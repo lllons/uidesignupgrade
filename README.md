@@ -1,25 +1,69 @@
 # uidesignupgrade
 
-A Claude Code skill that upgrades an app or website UI using a growing library of UX, animation, typography and "un-slop" principles. The ones that need motion to explain are shown below as before/after GIFs.
+An [Agent Skill](https://agentskills.io) that upgrades an app or website UI using a growing library of UX, animation, typography, colour and "un-slop" principles. It works with Claude Code, Codex, Gemini CLI, GitHub Copilot, OpenCode, Cursor and any other agent that reads `SKILL.md`. The principles that need motion to explain are shown below as before/after GIFs.
+
+## Quick start for agents
+
+Copy this prompt (use the copy button on the block) and paste it into your coding agent. It installs the skill for whichever agent you're using.
+
+```text
+Install the "uidesignupgrade" UI design skill from https://github.com/lllons/uidesignupgrade for me, at user level so it works in every project.
+
+1. Work out which coding agent you are, then run the matching install:
+   - Claude Code: claude plugin marketplace add lllons/uidesignupgrade && claude plugin install uidesignupgrade@lllons-plugins
+   - Gemini CLI: gemini skills install https://github.com/lllons/uidesignupgrade.git --consent
+   - Codex, GitHub Copilot, OpenCode (they all read ~/.agents/skills): git clone https://github.com/lllons/uidesignupgrade "$HOME/.agents/skills/uidesignupgrade"
+   - Cursor or any other agent: npx skills add lllons/uidesignupgrade -g
+2. If that command isn't available, clone the repo into your agent's personal skills folder instead.
+3. Check that SKILL.md and the references/ folder are in place, and reload skills if your agent needs it.
+4. Tell me how to invoke the skill, then offer to run it on the current project.
+```
 
 ## Install
 
-As a plugin (recommended, updates with `claude plugin update`):
+Pick your agent. Each installs at user level (available in every project).
+
+**Claude Code** (as a plugin, updates with `claude plugin update`):
 
 ```sh
 claude plugin marketplace add lllons/uidesignupgrade
 claude plugin install uidesignupgrade@lllons-plugins
 ```
 
-Or clone it as a standalone skill:
+**Gemini CLI:**
 
 ```sh
-git clone https://github.com/lllons/uidesignupgrade ~/.claude/skills/uidesignupgrade
+gemini skills install https://github.com/lllons/uidesignupgrade.git --consent
 ```
+
+**Codex, GitHub Copilot and OpenCode** (all read `~/.agents/skills`):
+
+```sh
+git clone https://github.com/lllons/uidesignupgrade "$HOME/.agents/skills/uidesignupgrade"
+```
+
+**Any agent, including Cursor** ([skills CLI](https://github.com/vercel-labs/skills), supports 70+ agents; needs Node.js 22.20+):
+
+```sh
+npx skills add lllons/uidesignupgrade -g
+```
+
+**Manual:** clone the repo into your agent's skills folder: `~/.claude/skills/` (Claude Code), `~/.agents/skills/` (Codex, Gemini CLI, Copilot, OpenCode), `~/.gemini/skills/` (Gemini CLI), `~/.copilot/skills/` (Copilot), `~/.config/opencode/skills/` (OpenCode). For a single project, use the project-level folder instead (for example `.agents/skills/` or `.claude/skills/`).
+
+To update a cloned install, run `git pull` inside the folder.
 
 ## Use
 
-In Claude Code, run `/uidesignupgrade:uidesignupgrade` (plugin) or `/uidesignupgrade` (standalone skill), or ask Claude to make a UI feel more polished or responsive. Claude audits the interface against the principles in [SKILL.md](SKILL.md), applies the fixes that fit, and reports what changed.
+Run the skill (`/uidesignupgrade` in Claude Code, or `/uidesignupgrade:uidesignupgrade` when installed as a plugin; Codex: `$uidesignupgrade`), or just ask your agent to make a UI feel more polished, fix its typography, or make it look less AI-generated. The agent audits the interface against the index in [SKILL.md](SKILL.md), reads the detailed [references](references/) for each area it touches, applies the fixes that fit, and reports what changed.
+
+| Reference | Covers |
+|-----------|--------|
+| [motion.md](references/motion.md) | every motion principle with tokens, code, mistakes and checks |
+| [ux-laws.md](references/ux-laws.md) | UX laws, layout, hit areas, layout shift, Gestalt principles |
+| [typography.md](references/typography.md) | type details with CSS, plus fonts by feeling |
+| [color.md](references/color.md) | 20 colour terms and a working OKLCH colour system |
+| [unslop.md](references/unslop.md) | the checklist for removing the generic AI look |
+| [patterns.md](references/patterns.md) | add-to-cart, sign-up/password, App Store screenshots, pricing |
 
 ## Motion and interaction, before and after
 
@@ -58,7 +102,7 @@ Also in the skill: pose to pose, transform-not-layout animation, velocity-matche
 | **Von Restorff effect**: make the pick stand out<br>Before: Nothing stands out: users hesitate. After: The pick stands out. | ![](assets/restorff.gif) |
 | **Layout shift**: reserve space so nothing jumps<br>Before: Image loads, button jumps away. After: Space reserved, nothing moves. | ![](assets/layout-shift.gif) |
 
-Also in the skill: bigger hit areas, Miller's law, Postel's law, Jakob's law, progressive disclosure, affordance, safe areas, comboboxes, concentric radii (inner = outer − padding), grouping with spacing and optical alignment.
+Also in the skill: bigger hit areas, Miller's law, Postel's law, Jakob's law, goal-gradient effect, progressive disclosure, affordance, safe areas, comboboxes, concentric radii (inner = outer − padding), grouping with spacing, optical alignment, redundancy gain, continuity and anthropomorphism.
 
 ## Typography, before and after
 
@@ -67,22 +111,29 @@ Also in the skill: bigger hit areas, Miller's law, Postel's law, Jakob's law, pr
 | **Tabular numbers**: digits that don't jitter<br>Before: Digits change width: jittery. After: Tabular figures: rock steady. | ![](assets/tabular-nums.gif) |
 | **Reserved bold width**: bold states don't shift the row<br>Before: Bold text widens, tabs shift. After: Width reserved for the bold state. | ![](assets/reserved-bold.gif) |
 
-Also in the skill: kerning, tracking, leading, x-height, line length, widows, text-box trim, underline offset, superscript spacing, fluid type with `clamp()`, small caps for acronyms, curly quotes, middle truncation, auto hyphenation, line-clamped titles, OKLCH colour and text contrast.
+Also in the skill: kerning, tracking, leading, x-height, line length, widows, text-box trim, underline offset, superscript spacing, fluid type with `clamp()`, small caps for acronyms, curly quotes, middle truncation, auto hyphenation, line-clamped titles and text contrast.
+
+## Patterns, before and after
+
+| Pattern | Before / After |
+|---------|----------------|
+| **Add to cart**: never pull shoppers away from shopping<br>Before: Jumps to the cart, shopper loses their place. After: Cart slides in and stays: keep shopping or check out. | ![](assets/add-to-cart.gif) |
+
+Also in the skill: sign-up and password screens, App Store screenshots (from Duolingo and Strava redesigns) and pricing pages.
 
 ## Beyond motion
 
 The skill also covers:
 
+- **Colour**: a working OKLCH system plus 20 terms explained for builders (hue, chroma, tint, shade, tone, analogous colours, simultaneous contrast, chromostereopsis, increased contrast mode, gamut, Abney effect, irradiation illusion, Stevens' power law, Hunt effect, Helmholtz–Kohlrausch effect, additive colour, opacity, sequential and diverging scales, relative luminance).
 - **Fonts by feeling**: Swiss, friendly, personality, techy, vintage, modern serif, soft serif and fun picks, plus the fonts that make a site look AI-generated.
 - **Un-slop checklist**: removing the generic AI look (filler badges, random italics, decorative mono, purple gradients, vague headlines, missing states).
-- **App Store screenshots**: brand colour, one idea per headline, a continuous visual across frames, a hook split over the first two slides, social proof.
-- **Worked example**: turning a generic password screen into a calm, secure and characterful one.
 
 The GIFs are generated by [`assets/make_gifs.py`](assets/make_gifs.py) (needs Pillow). Principles that read clearly as text don't get one.
 
 ## Adding a principle
 
-1. Add it to the right section in [SKILL.md](SKILL.md).
+1. Add a one-line summary to the right section in [SKILL.md](SKILL.md), and the full entry (what, why, how, avoid, check) to the matching file in [references/](references/).
 2. If it needs a demo, add a draw function to [`assets/make_gifs.py`](assets/make_gifs.py), append it to `PRINCIPLES`, run `python assets/make_gifs.py <function_name>`, and add a row to the matching table above.
 3. Bump `version` in [`.claude-plugin/plugin.json`](.claude-plugin/plugin.json) so plugin users get the update.
 

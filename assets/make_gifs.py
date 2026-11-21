@@ -825,12 +825,75 @@ def tabular_nums(p, t, a):
     return "Digits change width: jittery" if not a else "Tabular figures: rock steady"
 
 
+def _product_page(p, count, bump=0.0):
+    p.text(40, 44, "VEYND", DARK, 11, True, anchor="lm")
+    p.rect(238, 36, 256, 54, None, 5, outline=DARK, w=2)  # bag icon
+    if count:
+        p.circle(256, 37, 7 + 3 * bump, ACCENT)
+        p.text(256, 36, str(count), "#ffffff", 8, True)
+    p.rect(40, 62, 260, 122, ACCENT_SOFT, 10)
+    p.rect(110, 78, 190, 106, DARK, 14)  # the speaker
+    p.text(40, 136, "Capsule speaker", DARK, 11, True, anchor="lm")
+    p.text(260, 136, "$249", DARK, 11, True, anchor="rm")
+    p.rect(40, 150, 260, 172, DARK, 11)
+    p.text(150, 160, "Add to bag", "#ffffff", 10, True)
+    p.text(40, 186, "Complete the set", MUTED, 9, anchor="lm")
+    for i in range(3):
+        p.rect(40 + i * 40, 194, 72 + i * 40, 204, SUBTLE, 4)
+
+
+def add_to_cart(p, t, a):
+    tap, leave = 0.15, 0.6
+    add_btn, keep_btn, back_btn = (150, 160), (196, 176), (52, 44)
+    if not a:  # jumps to a cart page, shopper has to go Back to keep shopping
+        if tap <= t < leave:
+            p.text(52, 44, "‹ Back", DARK, 11, True, anchor="lm")
+            p.text(150, 70, "Your bag", DARK, 14, True)
+            p.rect(40, 88, 260, 124, None, 8, outline=LINE, w=1)
+            p.rect(48, 94, 72, 118, DARK, 6)
+            p.text(82, 106, "Capsule speaker", DARK, 10, anchor="lm")
+            p.text(252, 106, "$249", DARK, 10, True, anchor="rm")
+            p.rect(40, 150, 260, 172, DARK, 11)
+            p.text(150, 160, "Checkout · $249", "#ffffff", 10, True)
+        else:
+            _product_page(p, 1 if t >= leave else 0)
+        cx, cy = along(t, [(0.0, tap - 0.02, (230, 200), add_btn), (0.4, leave - 0.02, add_btn, back_btn),
+                           (leave + 0.05, 0.8, back_btn, (100, 199))])
+        clicks = (tap, leave)
+    else:  # drawer slides in, stays until the shopper chooses
+        k = ease_out(seg(t, tap, tap + 0.12)) * (1 - ease(seg(t, leave, leave + 0.1)))
+        _product_page(p, 1 if t >= tap else 0, math.sin(math.pi * seg(t, leave + 0.05, leave + 0.15)))
+        if k > 0.01:
+            p.rect(0, 0, PW, PH, "#000000", 14, 0.25 * k)
+            x = lerp(PW, 112, k)
+            p.rect(x, 28, PW - 1, PH - 1, CARD, 12)
+            if x < 280:
+                p.circle(x + 18, 48, 7, EMERALD)
+                p.check(x + 18, 48, 3.5, "#ffffff", 2)
+                p.text(x + 32, 48, "Added to bag", DARK, 10, True, anchor="lm")
+                p.rect(x + 12, 64, x + 40, 92, DARK, 6)
+                p.text(x + 48, 72, "Capsule speaker", DARK, 9, anchor="lm")
+                p.text(x + 48, 86, "Ember · $249", MUTED, 9, anchor="lm")
+                bx1 = PW - 12  # buttons anchored to the drawer's right edge so they never leave the panel
+                p.rect(x + 12, 140, bx1, 160, DARK, 10)
+                p.text((x + 12 + bx1) / 2, 149, "Checkout", "#ffffff", 9, True)
+                p.rect(x + 12, 166, bx1, 186, None, 10, outline=DARK, w=1)
+                p.text((x + 12 + bx1) / 2, 175, "Keep shopping", DARK, 9, True)
+        cx, cy = along(t, [(0.0, tap - 0.02, (230, 200), add_btn), (0.35, leave - 0.02, add_btn, keep_btn),
+                           (leave + 0.05, 0.85, keep_btn, (120, 198))])
+        clicks = (tap, leave)
+    p.cursor(cx, cy)
+    for c in clicks:
+        p.ripple(cx, cy, t - c)
+    return "Jumps to the cart, shopper loses their place" if not a else "Cart slides in and stays: keep shopping or check out"
+
+
 SWATCH = (BG, DARK, MUTED, G300, G400, G600, LINE, SUBTLE, ACCENT, ACCENT_SOFT, EMERALD, RED, "#ebebeb")
 
 PRINCIPLES = [exaggeration, origin, staggering, squash, rubber, doherty, anticipation, fitts, easing,
               hick, follow, arcs, restorff, timing, interruptible, secondary, frequency, peak_end,
               scale_097, directional, smooth_height, theme_switch, tooltip_delay, staging, layout_shift,
-              reserved_bold, tabular_nums]
+              reserved_bold, tabular_nums, add_to_cart]
 
 
 def background():
