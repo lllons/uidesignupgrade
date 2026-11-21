@@ -68,29 +68,6 @@ def banner(w=1280, h=640):
     return img
 
 
-def preview(names=(("exaggeration", 110), ("origin", 34), ("add-to-cart", 60), ("layout-shift", 110),
-                   ("staggering", 26), ("peak-end", 150))):
-    """Grid of before/after stills taken from the demo GIFs, each at a frame where the two sides differ."""
-    shots = []
-    for n, frame in names:
-        with Image.open(ROOT / "assets" / f"{n}.gif") as g:
-            g.seek(frame)
-            shots.append((n, g.convert("RGB")))
-    sw, sh = shots[0][1].size
-    pad, label, top = 32, 40, 120
-    w, h = pad + 2 * (sw + pad), top + 3 * (label + sh + pad)
-    img = Image.new("RGB", (w, h), PAPER)
-    d = ImageDraw.Draw(img)
-    img.paste(mark(56), (pad, 32), mark(56))
-    d.text((pad + 76, 60), "Before / after, for every principle that moves", fill=INK, font=font(34, True), anchor="lm")
-    for i, (n, im) in enumerate(shots):
-        x, y = pad + (i % 2) * (sw + pad), top + (i // 2) * (label + sh + pad)
-        d.ellipse([x, y + 12, x + 12, y + 24], fill=ACCENTS[i % 4])
-        d.text((x + 22, y + 18), n.replace("-", " ").capitalize(), fill=INK, font=font(22, True), anchor="lm")
-        img.paste(im, (x, y + label))
-    return img
-
-
 def covers(w=1280, h=640):
     """What's inside: one card per reference file."""
     cards = (("Motion", "Origin awareness, springs, interruptible motion, timing"),
@@ -125,7 +102,6 @@ def covers(w=1280, h=640):
 
 
 if __name__ == "__main__":
-    preview().save(OUT / "preview.png")
     covers().save(OUT / "covers.png")
     (OUT / "logo.svg").write_text(svg(), encoding="utf-8")
     mark(1024).save(OUT / "logo.png")

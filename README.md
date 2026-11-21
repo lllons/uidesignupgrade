@@ -15,28 +15,7 @@
   <img src="https://img.shields.io/badge/works%20with-Claude%20Code%20%C2%B7%20Codex%20%C2%B7%20Gemini%20CLI%20%C2%B7%20Copilot%20%C2%B7%20OpenCode%20%C2%B7%20Cursor-16c47f" alt="Works with Claude Code, Codex, Gemini CLI, Copilot, OpenCode and Cursor">
 </p>
 
-<p align="center">
-  <img src="assets/brand/preview.png" width="860" alt="Before and after stills of six demos: exaggeration, origin awareness, add to cart, layout shift, staggering and peak-end rule">
-</p>
-
 An [Agent Skill](https://agentskills.io) that upgrades an app or website UI using a growing library of UX, animation, typography, colour and "un-slop" principles. It works with Claude Code, Codex, Gemini CLI, GitHub Copilot, OpenCode, Cursor and any other agent that reads `SKILL.md`. The principles that need motion to explain are shown below as before/after GIFs.
-
-## Quick start for agents
-
-Copy this prompt (use the copy button on the block) and paste it into your coding agent. It installs the skill for whichever agent you're using.
-
-```text
-Install the "uidesignupgrade" UI design skill from https://github.com/lllons/uidesignupgrade for me, at user level so it works in every project.
-
-1. Work out which coding agent you are, then run the matching install:
-   - Claude Code: claude plugin marketplace add lllons/uidesignupgrade && claude plugin install uidesignupgrade@lllons-plugins
-   - Gemini CLI: gemini skills install https://github.com/lllons/uidesignupgrade.git --consent
-   - Codex, GitHub Copilot, OpenCode (they all read ~/.agents/skills): git clone https://github.com/lllons/uidesignupgrade "$HOME/.agents/skills/uidesignupgrade"
-   - Cursor or any other agent: npx uidesignupgrade --agent all (or: npx skills add lllons/uidesignupgrade -g)
-2. If that command isn't available, clone the repo into your agent's personal skills folder instead.
-3. Check that SKILL.md and the references/ folder are in place, and reload skills if your agent needs it.
-4. Tell me how to invoke the skill, then offer to run it on the current project.
-```
 
 ## Install
 
