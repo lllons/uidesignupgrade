@@ -9,16 +9,20 @@ S = 2  # supersample factor for anti-aliasing
 FPS = 50
 MOVE, HOLD, FADE = 150, 40, 15  # 3 s animating, 0.8 s hold, 0.3 s crossfade back to the first frame
 N = MOVE + HOLD + FADE
-PW, PH, GAP, M = 300, 230, 16, 10  # panel size, gap between panels, outer margin
+PW, PH, GAP, M = 300, 212, 16, 10  # panel size, gap between panels, outer margin
 W, H = M * 2 + PW * 2 + GAP, M * 2 + PH
 OUT = Path(__file__).parent
 
-BG, INK, MUTED, CARD, DARK = "#0a0a12", "#f8fafc", "#94a3b8", "#f8fafc", "#0f172a"
-PINK, VIOLET, CYAN, AMBER = "#f472b6", "#8b5cf6", "#22d3ee", "#fbbf24"
-EMERALD, BLUE, RED, ORANGE = "#34d399", "#60a5fa", "#f87171", "#fb923c"
-BAR, BAR2 = "#94a3b8", "#cbd5e1"
-RAINBOW = (PINK, AMBER, CYAN, VIOLET, EMERALD, BLUE, ORANGE)
-GRAD = {False: ("#2a2a35", "#121218"), True: ("#4c1d95", "#0b2a5b")}  # panel gradients: before dull, after vivid
+# Monochrome system: white surfaces, black foreground, one accent; red/green only for error/success.
+BG, CARD, LINE, SUBTLE = "#ffffff", "#ffffff", "#e5e5e5", "#f5f5f5"
+DARK = INK = "#0a0a0a"
+MUTED, G300, G400, G600 = "#737373", "#d4d4d4", "#a3a3a3", "#525252"
+ACCENT, ACCENT_SOFT = "#0057ff", "#e6eeff"
+EMERALD, RED = "#16a34a", "#dc2626"
+# legacy names used by the demos, mapped onto the system
+PINK, VIOLET, CYAN, AMBER, BLUE, ORANGE = ACCENT, DARK, G600, G400, ACCENT, G300
+BAR, BAR2 = G400, LINE
+RAINBOW = (DARK, G400, ACCENT, G300, G600, MUTED, G300)
 
 
 # --- easing -------------------------------------------------------------------------------------
@@ -76,9 +80,9 @@ class Panel:
         s.d.rounded_rectangle(s._box(x0, y0, x1, y1), r * S, fill=rgba(c, a) if c else None,
                               outline=rgba(outline, a) if outline else None, width=int(w * S))
 
-    def card(s, x0, y0, x1, y1, c=CARD, r=10, a=1.0):  # rect with a soft drop shadow
-        s.rect(x0 + 1, y0 + 5, x1 + 1, y1 + 7, "#000000", r, 0.3 * a)
-        s.rect(x0, y0, x1, y1, c, r, a)
+    def card(s, x0, y0, x1, y1, c=CARD, r=10, a=1.0):  # hairline border + barely-there shadow, no glow
+        s.rect(x0, y0 + 2, x1, y1 + 3, "#000000", r, 0.05 * a)
+        s.rect(x0, y0, x1, y1, c, r, a, outline=LINE if c == CARD else None, w=1)
 
     def ellipse(s, x, y, rx, ry, c, a=1.0, outline=None, w=0):
         if rx <= 0.3 or ry <= 0.3 or a <= 0:
@@ -107,8 +111,8 @@ class Panel:
     def ripple(s, x, y, age):  # tap indicator; age is t since the tap
         if 0 <= age < 0.14:
             k = age / 0.14
-            s.circle(x, y, 7 + 20 * ease_out(k), None, outline="#ffffff", w=2, a=1 - k)
-            s.circle(x, y, 8, "#ffffff", 0.6 * (1 - k))
+            s.circle(x, y, 7 + 20 * ease_out(k), None, outline=DARK, w=2, a=0.5 * (1 - k))
+            s.circle(x, y, 8, DARK, 0.15 * (1 - k))
 
     def cursor(s, x, y):
         pts = [(0, 0), (0, 17), (4.5, 13), (7.5, 20), (10.5, 19), (7.5, 12.5), (12.5, 12.5)]
@@ -134,12 +138,8 @@ class Panel:
             pts.append((x + hx * size / 16, y + hy * size / 16))
         s.poly(pts, c, a, outline, w)
 
-    def chrome(s, caption):
-        c, label = (EMERALD, "AFTER") if s.after else (RED, "BEFORE")
-        w = font(9, True).getlength(label) / S + 18
-        s.rect(12, 12, 12 + w, 30, c, 9, 0.2)
-        s.text(12 + w / 2, 21, label, c, 9, True)
-        s.text(PW / 2, PH - 15, caption, INK if s.after else MUTED, 11, s.after)
+    def chrome(s):  # plain labels, no badge pills; the explanation lives in the README, not in the GIF
+        s.text(14, 21, "After" if s.after else "Before", DARK if s.after else MUTED, 11, s.after, anchor="lm")
 
 
 def list_rows(p, y0, n, gap=30, h=24, off=0.0, a=1.0, x0=24, x1=276, first=0):
@@ -181,7 +181,7 @@ def exaggeration(p, t, a):
 
 def origin(p, t, a):
     for i in range(3):
-        p.rect(24, 48 + i * 34, 210 - i * 40, 70 + i * 34, "#ffffff", 6, 0.08)
+        p.rect(24, 48 + i * 34, 210 - i * 40, 70 + i * 34, "#000000", 6, 0.04)
     bx, by, tap = 248, 168, 0.15
     final = (96, 44, 270, 144)
     if t >= tap:
@@ -201,7 +201,7 @@ def origin(p, t, a):
             x2, _ = m(136 + (100, 72, 88)[i], 0)
             p.circle(cx, cy, 8 * min(sx, sy), c, al)
             p.rect(cx + 16 * sx, cy - 4 * sy, x2, cy + 4 * sy, BAR2, 4, al)
-    p.circle(bx, by + 3, 20, "#000000", 0.3)
+    p.circle(bx, by + 2, 20, "#000000", 0.08)
     p.circle(bx, by, 20, PINK)
     p.line([(bx - 7, by), (bx + 7, by)], "#ffffff", 3)
     p.line([(bx, by - 7), (bx, by + 7)], "#ffffff", 3)
@@ -233,12 +233,12 @@ def squash(p, t, a):
             st = min(0.3, v * 0.08)
             sx, sy = 1 - st * 0.5, 1 + st
     floor, r = 182, 18
-    p.line([(40, floor), (260, floor)], "#ffffff", 2, 0.15)
+    p.line([(40, floor), (260, floor)], "#000000", 2, 0.15)
     sh = 1 - h / 160
     p.ellipse(150, floor + 2, 24 * sh * sx, 5 * sh, "#000000", 0.45 * sh)
     cy = floor - h - r * sy
-    p.ellipse(150, cy, r * sx, r * sy, AMBER)
-    p.ellipse(150 + 4 * sx, cy + 5 * sy, 12 * sx, 10 * sy, ORANGE, 0.5)
+    p.ellipse(150, cy, r * sx, r * sy, ACCENT)
+    p.ellipse(150 + 4 * sx, cy + 5 * sy, 12 * sx, 10 * sy, "#003db3", 0.35)
     p.ellipse(150 - 6 * sx, cy - 6 * sy, 5 * sx, 4 * sy, "#ffffff", 0.6)
     return "Rigid, like a rock" if not a else "Squash on impact, stretch in flight"
 
@@ -253,8 +253,8 @@ def rubber(p, t, a):
         p.arc(150, 44 + off / 2, 8, rot, rot + 270, CYAN, 3, clamp(off / 30))
     list_rows(p, 46, 4, off=off)
     if 0.1 < t < rel:
-        p.circle(228, 60 + pull, 13, "#ffffff", 0.35)
-        p.circle(228, 60 + pull, 13, None, outline="#ffffff", w=2, a=0.8)
+        p.circle(228, 60 + pull, 13, DARK, 0.08)
+        p.circle(228, 60 + pull, 13, None, outline=DARK, w=2, a=0.5)
     p.ripple(228, 60, t - 0.1)
     return "Hard stop at the edge" if not a else "Stretches, then springs back"
 
@@ -267,9 +267,9 @@ def doherty(p, t, a):
     sc = 0.94 if a and tap <= t < tap + 0.03 else 1
     w, h = 64 * sc, 20 * sc
     if t < resp:
-        col, label = "#475569", "Save"
+        col, label = DARK, "Save"
     elif t < done:
-        col, label = VIOLET, ""
+        col, label = ACCENT, ""
     else:
         col, label = EMERALD, "Saved"
     p.card(150 - w, 100 - h, 150 + w, 100 + h, col, 12)
@@ -328,7 +328,7 @@ def fitts(p, t, a):
     big = a
     p.card(*btn, EMERALD if hit else BLUE, 10 if big else 4)
     if big:
-        p.text((btn[0] + btn[2]) / 2, (btn[1] + btn[3]) / 2 - 1, "Done!" if hit else "Buy now", DARK, 13, True)
+        p.text((btn[0] + btn[2]) / 2, (btn[1] + btn[3]) / 2 - 1, "Done!" if hit else "Buy now", "#ffffff", 13, True)
     cx, cy = along(t, segs)
     p.cursor(cx, cy)
     p.ripple(cx, cy, t - click)
@@ -340,15 +340,15 @@ def fitts(p, t, a):
 def easing(p, t, a):
     f = ease if a else clamp
     u = seg(t, 0.1, 0.8)
-    p.line([(40, 130), (260, 130)], "#ffffff", 2, 0.12)
+    p.line([(40, 130), (260, 130)], "#000000", 2, 0.12)
     for j in range(10, 0, -1):  # ghost trail: spacing shows speed
-        p.circle(40 + 220 * f(seg(t - j * 0.018, 0.1, 0.8)), 130, 14, CYAN, 0.05 * (11 - j))
-    p.circle(40 + 220 * f(u), 130, 14, CYAN)
+        p.circle(40 + 220 * f(seg(t - j * 0.018, 0.1, 0.8)), 130, 14, ACCENT, 0.05 * (11 - j))
+    p.circle(40 + 220 * f(u), 130, 14, ACCENT)
     p.circle(36 + 220 * f(u), 126, 4, "#ffffff", 0.6)
     gx, gy, gw, gh = 196, 44, 76, 50  # mini curve graph
-    p.rect(gx - 8, gy - 8, gx + gw + 8, gy + gh + 8, "#ffffff", 8, 0.07)
-    p.line([(gx + gw * i / 40, gy + gh - gh * f(i / 40)) for i in range(41)], CYAN, 2, 0.9)
-    p.circle(gx + gw * u, gy + gh - gh * f(u), 3.5, "#ffffff")
+    p.rect(gx - 8, gy - 8, gx + gw + 8, gy + gh + 8, SUBTLE, 8)
+    p.line([(gx + gw * i / 40, gy + gh - gh * f(i / 40)) for i in range(41)], ACCENT, 2, 0.9)
+    p.circle(gx + gw * u, gy + gh - gh * f(u), 3.5, DARK)
     return "Linear: robotic" if not a else "Ease in, ease out: natural"
 
 
@@ -367,7 +367,7 @@ def hick(p, t, a):
     for i, (lbl, c) in enumerate(items):
         y0 = top + i * h
         if i == idx:
-            p.rect(86, y0 + 1, 214, y0 + h - 1, EMERALD if picked else "#e2e8f0", 6)
+            p.rect(86, y0 + 1, 214, y0 + h - 1, EMERALD if picked else LINE, 6)
         p.circle(100, y0 + h / 2, min(5, h / 3.5), c)
         p.text(112, y0 + h / 2, lbl, DARK, 11 if a else 9, a and i == idx, anchor="lm")
     if picked:
@@ -391,8 +391,8 @@ def follow(p, t, a):
     p.rect(ix + 48, 90, ix + 108, 96, BAR2, 3)
     p.rect(ix + 16, 110, ix + 134, 152, CYAN, 8, 0.35)
     p.circle(ix + 40, 124, 6, AMBER)
-    p.circle(cx + 150 + lag * 0.5, 58 + bob, 11, AMBER)
-    p.text(cx + 150 + lag * 0.5, 57 + bob, "3", DARK, 10, True)
+    p.circle(cx + 150 + lag * 0.5, 58 + bob, 11, ACCENT)
+    p.text(cx + 150 + lag * 0.5, 57 + bob, "3", "#ffffff", 10, True)
     return "Everything stops dead" if not a else "Details settle a beat later"
 
 
@@ -408,11 +408,11 @@ def arcs(p, t, a):
         if u > 0:
             p.line([pt(u * i / 30) for i in range(31)], c, 2, 0.35)
             x, y = pt(u)
-            p.circle(x, y + 3, 14, "#000000", 0.25)
+            p.circle(x, y + 2, 14, "#000000", 0.08)
             p.circle(x, y, 14, c)
             p.circle(x, y, 4, "#ffffff", 0.9)
     rot = math.radians(45 * ease(seg(t, tap, tap + 0.2)))
-    p.circle(fab[0], fab[1] + 3, 20, "#000000", 0.3)
+    p.circle(fab[0], fab[1] + 2, 20, "#000000", 0.08)
     p.circle(*fab, 20, VIOLET)
     for ang in (rot, rot + math.pi / 2):
         dx, dy = 7 * math.cos(ang), 7 * math.sin(ang)
@@ -434,11 +434,11 @@ def restorff(p, t, a):
         if t >= click and i == 1:
             p.rect(x0 - g - 3, 47 - g, x0 + 83 + g, 171 + g, None, 14, outline=EMERALD, w=3)
         p.text(x0 + 40, 90, price, "#ffffff" if hi else DARK, 18, True)
-        p.text(x0 + 40, 111, "/ month", "#e9d5ff" if hi else "#64748b", 9)
-        p.rect(x0 + 14, 132, x0 + 66, 148, AMBER if hi else BAR2, 8)
+        p.text(x0 + 40, 111, "/ month", G400 if hi else MUTED, 9)
+        p.rect(x0 + 14, 132, x0 + 66, 148, ACCENT if hi else BAR2, 8)
         if hi:
-            p.rect(x0 + 8, 40 - g, x0 + 72, 56 - g, AMBER, 8)
-            p.text(x0 + 40, 47 - g, "POPULAR", DARK, 8, True)
+            p.rect(x0 + 8, 40 - g, x0 + 72, 56 - g, ACCENT, 8)
+            p.text(x0 + 40, 47 - g, "Popular", "#ffffff", 8, True)
     cx, cy = along(t, segs)
     p.cursor(cx, cy)
     p.ripple(cx, cy, t - click)
@@ -484,7 +484,7 @@ def interruptible(p, t, a):
     else:
         k = open_k(tap) * (1 - ease_out(seg(t, tap, tap + 0.25)))
     list_rows(p, 46, 4)
-    p.rect(0, 0, PW, PH, "#000000", 14, 0.45 * k)
+    p.rect(0, 0, PW, PH, "#000000", 14, 0.2 * k)
     y = lerp(198, 72, k)
     if y < 194:
         p.rect(16, y, 284, 198, CARD, 16)
@@ -501,9 +501,9 @@ def secondary(p, t, a):
     tap = 0.2
     liked = t >= tap
     p.card(60, 36, 240, 190, CARD, 14)
-    p.rect(70, 46, 230, 140, BLUE, 10)
-    p.circle(112, 78, 13, AMBER)
-    p.poly([(70, 140), (130, 92), (170, 124), (196, 104), (230, 132), (230, 140)], EMERALD)
+    p.rect(70, 46, 230, 140, ACCENT_SOFT, 10)
+    p.circle(112, 78, 13, ACCENT)
+    p.poly([(70, 140), (130, 92), (170, 124), (196, 104), (230, 132), (230, 140)], G300)
     hx, hy = 88, 164
     if a and liked:
         k = seg(t, tap, tap + 0.25)
@@ -518,20 +518,20 @@ def secondary(p, t, a):
     if liked:
         p.heart(hx, hy, 11 * sc, RED)
     else:
-        p.heart(hx, hy, 11, None, outline="#64748b", w=2)
+        p.heart(hx, hy, 11, None, outline=MUTED, w=2)
     if a and liked:
         k = ease_out(seg(t, tap, tap + 0.15))
-        p.text(106, hy - 14 * k, "41", "#64748b", 12, True, 1 - k, anchor="lm")
+        p.text(106, hy - 14 * k, "41", MUTED, 12, True, 1 - k, anchor="lm")
         p.text(106, hy + 14 * (1 - k), "42", RED, 12, True, k, anchor="lm")
     else:
-        p.text(106, hy, "42" if liked else "41", RED if liked else "#64748b", 12, True, anchor="lm")
+        p.text(106, hy, "42" if liked else "41", RED if liked else MUTED, 12, True, anchor="lm")
     p.ripple(hx, hy, t - tap)
     return "Heart just turns red" if not a else "Pop, burst and count roll"
 
 
 def frequency(p, t, a):
     taps, seq = (0.12, 0.24, 0.36), (1, 2, 0)
-    colors, names = (CYAN, PINK, AMBER), ("Home", "Explore", "Profile")
+    colors, names = (DARK, ACCENT, G300), ("Home", "Explore", "Profile")
     trans, end, prev = [], 0.0, 0
     for tt, i in zip(taps, seq):  # before: each 600 ms transition waits for the previous one
         s0 = tt if a else max(tt, end)
@@ -550,8 +550,8 @@ def frequency(p, t, a):
     for idx, al, dy in ((shown_prev, 1 - k, 0), (shown, k, (1 - k) * 12)):
         if al > 0.01 and not (idx == shown and idx == shown_prev and al < 1):
             p.card(40, 44 + dy, 260, 150 + dy, colors[idx], 14, al)
-            p.text(150, 97 + dy, names[idx], DARK, 16, True, al)
-    p.rect(28, 160, 272, 194, "#ffffff", 14, 0.1)
+            p.text(150, 97 + dy, names[idx], "#ffffff" if idx < 2 else DARK, 16, True, al)
+    p.rect(28, 160, 272, 194, SUBTLE, 14)
     for i in range(3):
         x = 70 + i * 80
         p.circle(x, 172, 5, colors[i], 1 if i == selected else 0.5)
@@ -566,15 +566,15 @@ def peak_end(p, t, a):
     done = t >= 0.58
     p.card(40, 46, 260, 176, CARD, 14)
     p.rect(58, 62, 82, 92, BLUE, 4)
-    p.poly([(74, 62), (82, 62), (82, 70)], "#bfdbfe")
+    p.poly([(74, 62), (82, 62), (82, 70)], ACCENT_SOFT)
     p.rect(94, 68, 200, 76, BAR, 4)
     p.rect(94, 82, 160, 88, BAR2, 3)
     if not (a and done):
-        p.rect(58, 122, 242, 132, "#e2e8f0", 5)
+        p.rect(58, 122, 242, 132, LINE, 5)
         p.rect(58, 122, 58 + 184 * k, 132, VIOLET, 5)
-        p.text(242, 110, f"{int(k * 100)}%", "#64748b", 9, anchor="rm")
+        p.text(242, 110, f"{int(k * 100)}%", MUTED, 9, anchor="rm")
         if done:
-            p.text(150, 154, "Upload complete", "#64748b", 10)
+            p.text(150, 154, "Upload complete", MUTED, 10)
     else:
         m = ease(seg(t, 0.58, 0.64))
         if m < 1:
@@ -584,7 +584,7 @@ def peak_end(p, t, a):
         p.circle(150, 127, r, EMERALD)
         if t >= 0.66:
             p.check(150, 127, 7, "#ffffff", 3, seg(t, 0.66, 0.76))
-        p.text(150, 160, "Uploaded!", "#059669", 13, True, seg(t, 0.68, 0.76))
+        p.text(150, 160, "Uploaded!", EMERALD, 13, True, seg(t, 0.68, 0.76))
         ct = seg(t, 0.62, 1.0) * 1.3
         for i in range(30):  # confetti with gravity
             ang = i * 2.39996
@@ -592,7 +592,7 @@ def peak_end(p, t, a):
             x = 150 + math.cos(ang) * spd * ct
             y = 127 + (math.sin(ang) * spd - 60) * ct + 150 * ct * ct
             if 4 < x < PW - 4 and 4 < y < 200:
-                p.rect(x - 2, y - 3.5, x + 2, y + 3.5, RAINBOW[i % 7], 1, 1 - seg(t, 0.85, 1.0))
+                p.rect(x - 2, y - 3.5, x + 2, y + 3.5, (ACCENT, EMERALD, DARK)[i % 3], 1, 1 - seg(t, 0.85, 1.0))
     return "Ends flat" if not a else "Ends on a win"
 
 
@@ -609,7 +609,7 @@ def chevron(p, x, y, ang, c):
 def scale_097(p, t, a):
     tap = 0.15
     for i in range(3):
-        p.rect(24, 48 + i * 30, 200 - i * 40, 66 + i * 30, "#ffffff", 6, 0.08)
+        p.rect(24, 48 + i * 30, 200 - i * 40, 66 + i * 30, "#000000", 6, 0.04)
     sc_btn = 0.97 if a and tap <= t < tap + 0.03 else 1
     p.card(150 - 46 * sc_btn, 172 - 15 * sc_btn, 150 + 46 * sc_btn, 172 + 15 * sc_btn, VIOLET, 10)
     p.text(150, 171, "Publish", "#ffffff", 11, True)
@@ -623,7 +623,7 @@ def scale_097(p, t, a):
             p.text(*m(150, 68), "Publish this page?", DARK, max(4, round(12 * sc)), True, al)
         p.rect(*m(84, 84), *m(216, 90), BAR2, 3, al)
         p.rect(*m(104, 96), *m(196, 102), BAR2, 3, al)
-        p.rect(*m(84, 116), *m(146, 134), "#e2e8f0", 8, al)
+        p.rect(*m(84, 116), *m(146, 134), LINE, 8, al)
         p.rect(*m(154, 116), *m(216, 134), VIOLET, 8, al)
     cx, cy = along(t, [(0.0, tap - 0.02, (240, 205), (160, 175))])
     p.cursor(cx, cy)
@@ -648,7 +648,7 @@ def directional(p, t, a):
             p.rect(96 + dx, 118, 204 + dx, 124, BAR2, 3, al)
     for i in range(3):
         p.circle(132 + i * 18, 142, 4, VIOLET if i == step else BAR2)
-    p.rect(60, 158, 118, 180, "#e2e8f0", 9)
+    p.rect(60, 158, 118, 180, LINE, 9)
     p.text(89, 168, "Back", DARK, 10, True)
     p.rect(182, 158, 240, 180, VIOLET, 9)
     p.text(211, 168, "Next", "#ffffff", 10, True)
@@ -668,7 +668,7 @@ def smooth_height(p, t, a):
     for i, q in enumerate(("How do refunds work?", "Can I change plans later?", "Do you offer a free trial?")):
         y = 48 + i * 30 + (ext if i else 0)
         if i:
-            p.rect(52, y - 1, 248, y, "#e2e8f0", 0)
+            p.rect(52, y - 1, 248, y, LINE, 0)
         p.text(56, y + 15, q, DARK, 10, i == 0 and k > 0.5, anchor="lm")
         chevron(p, 240, y + 15, math.pi * k if i == 0 else 0, DARK)
     if ext > 8:
@@ -693,11 +693,11 @@ def theme_switch(p, t, a):
                 v = lerp(1 - to, to, 1.0 if dur == 0 else ease(seg(t, tt, tt + dur)))
         return v
     kb, kt, kc = (dark_k(d) for d in ((0, 0, 0) if a else (0.1, 0.04, 0.17)))  # bg 300 ms, text 120 ms, chart 500 ms
-    p.card(36, 40, 264, 190, mix(CARD, "#1e293b", kb), 14)
-    p.text(56, 62, "Revenue this week", mix("#64748b", MUTED, kt), 10, anchor="lm")
-    p.text(56, 86, "$48,210", mix(DARK, INK, kt), 20, True, anchor="lm")
+    p.card(36, 40, 264, 190, mix(CARD, "#171717", kb), 14)
+    p.text(56, 62, "Revenue this week", mix(MUTED, MUTED, kt), 10, anchor="lm")
+    p.text(56, 86, "$48,210", mix(DARK, "#ffffff", kt), 20, True, anchor="lm")
     for i, h in enumerate((20, 34, 26, 44, 38, 52, 30, 60, 48, 70)):
-        c = mix(BLUE, CYAN, kc) if i == 9 else mix(BAR2, "#475569", kc)
+        c = mix(ACCENT, "#5c8dff", kc) if i == 9 else mix(BAR2, G600, kc)
         p.rect(58 + i * 19, 176 - h, 70 + i * 19, 176, c, 3)
     knob = dark_k(0.04)
     p.rect(222, 54, 252, 70, mix(BAR2, VIOLET, knob), 8)
@@ -721,7 +721,7 @@ def tooltip_delay(p, t, a):
     p.card(48, 96, 252, 132, CARD, 10)
     for i, (x, g) in enumerate(zip(xs, glyphs)):
         if i == cur:
-            p.rect(x - 13, 101, x + 13, 127, "#e2e8f0", 6)
+            p.rect(x - 13, 101, x + 13, 127, LINE, 6)
         p.text(x, 113, g, DARK, 12, True)
     if cur >= 0 and (since >= delay or (a and cur > 0)):
         x, lbl = xs[cur], labels[cur]
@@ -729,7 +729,7 @@ def tooltip_delay(p, t, a):
         al = 1.0 if (a and cur > 0) else seg(since, delay, delay + 0.03)
         p.rect(x - w / 2, 68, x + w / 2, 88, DARK, 6, al)
         p.poly([(x - 5, 88), (x + 5, 88), (x, 93)], DARK, al)
-        p.text(x, 77, lbl, INK, 10, a=al)
+        p.text(x, 77, lbl, "#ffffff", 10, a=al)
     p.cursor(*along(t, segs))
     return "Waits 600 ms on every button" if not a else "Skips the delay once one is open"
 
@@ -761,12 +761,12 @@ def layout_shift(p, t, a):
     p.card(40, 36, 260, 196, CARD, 12)
     p.rect(56, 46, 200, 56, BAR, 4)
     if a:
-        p.rect(56, 64, 244, 124, "#e2e8f0", 8)
+        p.rect(56, 64, 244, 124, SUBTLE, 8)
     if loaded:
         al = seg(t, load, load + 0.08) if a else 1.0
-        p.rect(56, 64, 244, 124, BLUE, 8, al)
-        p.circle(92, 84, 9, AMBER, al)
-        p.poly([(56, 124), (110, 94), (150, 114), (190, 96), (244, 120), (244, 124)], EMERALD, al)
+        p.rect(56, 64, 244, 124, ACCENT_SOFT, 8, al)
+        p.circle(92, 84, 9, ACCENT, al)
+        p.poly([(56, 124), (110, 94), (150, 114), (190, 96), (244, 120), (244, 124)], G300, al)
     for i, w in enumerate((180, 160, 120)):
         p.rect(56, text_y + i * 10, 56 + w, text_y + i * 10 + 5, BAR2, 3)
     btn_y = text_y + 36
@@ -796,8 +796,8 @@ def reserved_bold(p, t, a):
     p.card(x - 6, 86, x + sum(widths) + 6, 124, CARD, 10)
     for i, s in enumerate(tabs):
         if i == active:
-            p.rect(x + 3, 91, x + widths[i] - 3, 119, "#ede9fe", 7)
-        p.text(x + widths[i] / 2, 104, s, VIOLET if i == active else "#475569", fs, i == active)
+            p.rect(x + 3, 91, x + widths[i] - 3, 119, SUBTLE, 7)
+        p.text(x + widths[i] / 2, 104, s, VIOLET if i == active else G600, fs, i == active)
         x += widths[i]
     x0 = 150 - sum(stable) / 2
     centers = [x0 + sum(stable[:i]) + stable[i] / 2 for i in range(3)]
@@ -815,18 +815,17 @@ def tabular_nums(p, t, a):
     prop = {"1": 0.42, "7": 0.5, "2": 0.55, "3": 0.55, "4": 0.62, "5": 0.55, "6": 0.58, "8": 0.58, "9": 0.58, "0": 0.6}
     widths = [fs * (0.3 if ch == "," else 0.58 if ch == "$" else (0.6 if a else prop[ch])) for ch in s]
     p.card(50, 60, 250, 170, CARD, 14)
-    p.text(70, 82, "Revenue", "#64748b", 10, anchor="lm")
+    p.text(70, 82, "Revenue", MUTED, 10, anchor="lm")
     x = 230 - sum(widths)
     for ch, w in zip(s, widths):
         p.text(x + w / 2, 118, ch, DARK, fs, True)
         x += w
     p.rect(176, 140, 230, 156, EMERALD, 8, 0.25)
-    p.text(203, 147, "+12.4%", "#059669", 9, True)
+    p.text(203, 147, "+12.4%", EMERALD, 9, True)
     return "Digits change width: jittery" if not a else "Tabular figures: rock steady"
 
 
-SWATCH = (PINK, VIOLET, CYAN, AMBER, EMERALD, BLUE, RED, ORANGE, INK, MUTED, DARK, BAR, BAR2, "#ffffff",
-          "#475569", "#64748b", "#e2e8f0", "#059669", "#e9d5ff", "#bfdbfe", "#334155")
+SWATCH = (BG, DARK, MUTED, G300, G400, G600, LINE, SUBTLE, ACCENT, ACCENT_SOFT, EMERALD, RED, "#ebebeb")
 
 PRINCIPLES = [exaggeration, origin, staggering, squash, rubber, doherty, anticipation, fitts, easing,
               hick, follow, arcs, restorff, timing, interruptible, secondary, frequency, peak_end,
@@ -836,28 +835,25 @@ PRINCIPLES = [exaggeration, origin, staggering, squash, rubber, doherty, anticip
 
 def background():
     img = Image.new("RGB", (W * S, H * S), BG)
-    size = (PW * S, PH * S)
-    grad = Image.linear_gradient("L").resize(size)
-    mask = Image.new("L", size, 0)
-    ImageDraw.Draw(mask).rounded_rectangle([0, 0, size[0] - 1, size[1] - 1], 14 * S, fill=255)
-    for col, after in enumerate((False, True)):
-        top, bot = GRAD[after]
-        panel = Image.composite(Image.new("RGB", size, bot), Image.new("RGB", size, top), grad)
-        img.paste(panel, ((M + col * (PW + GAP)) * S, M * S), mask)
+    d = ImageDraw.Draw(img)
+    for col in range(2):  # flat white panels separated by a hairline border, no gradients
+        x0 = (M + col * (PW + GAP)) * S
+        d.rounded_rectangle([x0, M * S, x0 + PW * S, (M + PH) * S], 14 * S, fill=BG, outline=LINE, width=S)
     return img
 
 
 def render(fn):
-    bg, frames = background(), []
+    bg, frames, captions = background(), [], {}
     for f in range(MOVE + HOLD):
         t = min(f / (MOVE - 1), 1.0)
         img = bg.copy()
         d = ImageDraw.Draw(img, "RGBA")
         for col, after in enumerate((False, True)):
             p = Panel(d, M + col * (PW + GAP), after)
-            p.chrome(fn(p, t, after))
+            captions[after] = fn(p, t, after)
+            p.chrome()
         # loop progress bar; also keeps every frame distinct so the GIF writer can't merge frames below FPS
-        d.rectangle([M * S, (H - 4) * S, (M + (W - 2 * M) * (f + 1) / N) * S, (H - 2) * S], fill=rgba("#334155"))
+        d.rectangle([M * S, (H - 4) * S, (M + (W - 2 * M) * (f + 1) / N) * S, (H - 2) * S], fill=rgba(LINE))
         frames.append(img.resize((W, H), Image.LANCZOS))
     last = frames[-1]
     for i in range(FADE):  # crossfade back to the first frame for a seamless loop
@@ -878,11 +874,12 @@ def render(fn):
     q[0].save(path, save_all=True, append_images=q[1:], duration=1000 // FPS, loop=0)
     with Image.open(path) as im:
         assert im.n_frames == N, f"{path.name}: {im.n_frames} frames, expected {N}"
-    return path
+    return path, captions
 
 
 if __name__ == "__main__":
     wanted = set(sys.argv[1:])
     for fn in PRINCIPLES:
         if not wanted or fn.__name__ in wanted:
-            print(render(fn).name)
+            path, cap = render(fn)  # captions go in the README's principle column
+            print(f"{path.name}\tBefore: {cap[False]}. After: {cap[True]}.")
