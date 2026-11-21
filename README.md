@@ -1,3 +1,5 @@
+> **Agents: refer to [agents.setup.md](agents.setup.md)** for setup instructions.
+
 # uidesignupgrade
 
 An [Agent Skill](https://agentskills.io) that upgrades an app or website UI using a growing library of UX, animation, typography, colour and "un-slop" principles. It works with Claude Code, Codex, Gemini CLI, GitHub Copilot, OpenCode, Cursor and any other agent that reads `SKILL.md`. The principles that need motion to explain are shown below as before/after GIFs.
