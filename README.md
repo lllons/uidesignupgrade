@@ -15,9 +15,7 @@
   <img src="https://img.shields.io/badge/works%20with-Claude%20Code%20%C2%B7%20Codex%20%C2%B7%20Gemini%20CLI%20%C2%B7%20Copilot%20%C2%B7%20OpenCode%20%C2%B7%20Cursor-16c47f" alt="Works with Claude Code, Codex, Gemini CLI, Copilot, OpenCode and Cursor">
 </p>
 
-<p align="center">
-  <video src="https://github.com/lllons/uidesignupgrade/raw/main/assets/brand/demo.mp4" poster="assets/brand/demo-poster.jpg" width="720" controls muted></video>
-</p>
+https://github.com/user-attachments/assets/7c6a4b6f-c6a2-4f63-a969-7073538e783b
 
 An [Agent Skill](https://agentskills.io) that upgrades an app or website UI using a growing library of UX, animation, typography, colour and "un-slop" principles. It works with Claude Code, Codex, Gemini CLI, GitHub Copilot, OpenCode, Cursor and any other agent that reads `SKILL.md`. The principles that need motion to explain are shown below as before/after GIFs.
 
