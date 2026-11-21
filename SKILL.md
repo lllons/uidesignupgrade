@@ -1,17 +1,17 @@
 ---
 name: uidesignupgrade
-description: Upgrade an app or website UI with 18 UX and animation principles (exaggeration, origin awareness, staggering, squash and stretch, rubber banding, Doherty threshold, anticipation, Fitts's law, easing, Hick's law, follow-through, arcs, Von Restorff, timing, interruptible motion, secondary action, frequency of use, peak-end rule). Use when the user runs /uidesignupgrade, or asks to make a UI feel more polished, alive, responsive or "premium", add micro-interactions, or audit motion and interaction quality.
+description: Upgrade an app or website UI with a library of UX and animation principles (such as exaggeration, origin awareness, staggering, easing, Fitts's and Hick's laws, interruptible motion and the peak-end rule). Use when the user runs /uidesignupgrade, or asks to make a UI feel more polished, alive, responsive or "premium", add micro-interactions, or audit motion and interaction quality.
 ---
 
 # UI Design Upgrade
 
-Audit the target UI (code, screenshots or a running app) against the 18 principles below, then apply the upgrades that fit. Work in the project's existing stack and animation tools (CSS transitions, Web Animations API, Framer Motion, SwiftUI, Flutter, etc.). Do not add an animation library if the platform can already do it.
+Audit the target UI (code, screenshots or a running app) against every principle below, then apply the upgrades that fit. Work in the project's existing stack and animation tools (CSS transitions, Web Animations API, Framer Motion, SwiftUI, Flutter, etc.). Do not add an animation library if the platform can already do it.
 
 ## Workflow
 
 1. Find the interactive surfaces: buttons, menus, modals, lists, forms, navigation, errors, success states.
 2. For each principle, note where it is missing or violated. Skip principles that do not apply.
-3. Apply fixes, highest impact first: responsiveness (6, 14) and frequent actions (17), then feedback and motion polish.
+3. Apply fixes, highest impact first: responsiveness (Doherty threshold, interruptible motion) and frequent actions (frequency of use), then feedback and motion polish.
 4. Respect `prefers-reduced-motion` (or the platform equivalent): keep state changes, drop or shorten decorative motion.
 5. Report a short before/after list: principle, where, what changed.
 

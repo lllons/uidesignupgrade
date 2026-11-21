@@ -1,0 +1,14 @@
+{
+  "name": "uidesignupgrade",
+  "displayName": "UI Design Upgrade",
+  "version": "1.0.0",
+  "icon": ".claude-plugin/icon.png",
+  "description": "Upgrade an app or website UI with a library of UX and animation principles, each with a before/after example.",
+  "author": { "name": "lllons", "url": "https://github.com/lllons" },
+  "homepage": "https://github.com/lllons/uidesignupgrade",
+  "repository": "https://github.com/lllons/uidesignupgrade",
+  "documentationUrl": "https://github.com/lllons/uidesignupgrade#readme",
+  "supportUrl": "https://github.com/lllons/uidesignupgrade/issues",
+  "license": "Apache-2.0",
+  "keywords": ["ui", "ux", "design", "animation", "motion", "micro-interactions"]
+}

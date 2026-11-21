@@ -166,7 +166,7 @@ PRINCIPLES = [exaggeration, origin, staggering, squash, rubber, doherty, anticip
               hick, follow, arcs, restorff, timing, interruptible, secondary, frequency, peak_end]
 
 
-def render(fn, i):
+def render(fn):
     frames = []
     for f in range(N):
         t = min(f / MOVE, 1.0)
@@ -180,10 +180,10 @@ def render(fn, i):
         # loop progress bar; also keeps every frame distinct so Pillow doesn't merge them below FPS
         d.rectangle([0, img.height - 2 * S, img.width * (f + 1) // N, img.height], fill=DIM)
         frames.append(img.resize((img.width // S, img.height // S), Image.LANCZOS))
-    path = OUT / f"{i:02d}-{fn.__name__.replace('_', '-')}.gif"
+    path = OUT / f"{fn.__name__.replace('_', '-')}.gif"
     frames[0].save(path, save_all=True, append_images=frames[1:], duration=1000 // FPS, loop=0)
     return path
 
 
 if __name__ == "__main__":
-    for i, fn in enumerate(PRINCIPLES, 1): print(render(fn, i).name)
+    for fn in PRINCIPLES: print(render(fn).name)

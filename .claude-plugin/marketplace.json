@@ -1,0 +1,13 @@
+{
+  "name": "lllons-plugins",
+  "owner": { "name": "lllons", "url": "https://github.com/lllons" },
+  "description": "Claude Code plugins by lllons.",
+  "plugins": [
+    {
+      "name": "uidesignupgrade",
+      "source": "./",
+      "description": "Upgrade an app or website UI with a library of UX and animation principles.",
+      "category": "design"
+    }
+  ]
+}
