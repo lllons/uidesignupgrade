@@ -1,6 +1,23 @@
 > **Agents: refer to [agents.setup.md](agents.setup.md)** for setup instructions.
 
-# uidesignupgrade
+<p align="center">
+  <img src="assets/brand/logo.svg" width="112" alt="uidesignupgrade logo: a white easing curve with a trail of coloured dots on black">
+</p>
+
+<h1 align="center">uidesignupgrade</h1>
+
+<p align="center">UX laws, motion, typography and colour for any coding agent.</p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/uidesignupgrade"><img src="https://img.shields.io/npm/v/uidesignupgrade?color=0a0a0a&label=npm" alt="npm version"></a>
+  <a href="https://github.com/lllons/uidesignupgrade/releases"><img src="https://img.shields.io/github/v/release/lllons/uidesignupgrade?color=0057ff" alt="latest release"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-0a0a0a" alt="Apache 2.0 license"></a>
+  <img src="https://img.shields.io/badge/works%20with-Claude%20Code%20%C2%B7%20Codex%20%C2%B7%20Gemini%20CLI%20%C2%B7%20Copilot%20%C2%B7%20OpenCode%20%C2%B7%20Cursor-16c47f" alt="Works with Claude Code, Codex, Gemini CLI, Copilot, OpenCode and Cursor">
+</p>
+
+<p align="center">
+  <img src="assets/brand/preview.png" width="860" alt="Before and after stills of six demos: exaggeration, origin awareness, add to cart, layout shift, staggering and peak-end rule">
+</p>
 
 An [Agent Skill](https://agentskills.io) that upgrades an app or website UI using a growing library of UX, animation, typography, colour and "un-slop" principles. It works with Claude Code, Codex, Gemini CLI, GitHub Copilot, OpenCode, Cursor and any other agent that reads `SKILL.md`. The principles that need motion to explain are shown below as before/after GIFs.
 
@@ -69,6 +86,10 @@ To update a cloned install, run `git pull` inside the folder.
 ## Use
 
 Run the skill (`/uidesignupgrade` in Claude Code, or `/uidesignupgrade:uidesignupgrade` when installed as a plugin; Codex: `$uidesignupgrade`), or just ask your agent to make a UI feel more polished, fix its typography, or make it look less AI-generated. The agent audits the interface against the index in [SKILL.md](SKILL.md), reads the detailed [references](references/) for each area it touches, applies the fixes that fit, and reports what changed.
+
+<p align="center">
+  <img src="assets/brand/covers.png" width="760" alt="What's inside: motion, UX laws, typography, colour, un-slop and patterns">
+</p>
 
 | Reference | Covers |
 |-----------|--------|
