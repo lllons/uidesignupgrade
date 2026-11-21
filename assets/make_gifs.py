@@ -5,7 +5,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 S = 2  # supersample factor for anti-aliasing
 PW, PH, TOP = 240, 170, 26  # panel size and label strip height
-N, MOVE = 48, 34  # total frames, frames spent animating (rest is a hold)
+FPS, N, MOVE = 25, 90, 60  # 3.6 s loop: 2.4 s animating, then a hold
 BG, PANEL, FG, DIM = "#0b0f17", "#1a2130", "#e5e7eb", "#4b5563"
 ACC, RED = "#a3e635", "#ef4444"
 OUT = Path(__file__).parent
@@ -177,9 +177,11 @@ def render(fn, i):
             d.rounded_rectangle([ox * S, TOP * S, (ox + PW) * S, (TOP + PH) * S], 10 * S, fill=PANEL)
             d.text(((ox + 8) * S, 8 * S), label, fill=ACC if after else DIM, font=FONT)
             fn(P(d, ox), t, after)
+        # loop progress bar; also keeps every frame distinct so Pillow doesn't merge them below FPS
+        d.rectangle([0, img.height - 2 * S, img.width * (f + 1) // N, img.height], fill=DIM)
         frames.append(img.resize((img.width // S, img.height // S), Image.LANCZOS))
     path = OUT / f"{i:02d}-{fn.__name__.replace('_', '-')}.gif"
-    frames[0].save(path, save_all=True, append_images=frames[1:], duration=33, loop=0)
+    frames[0].save(path, save_all=True, append_images=frames[1:], duration=1000 // FPS, loop=0)
     return path
 
 
