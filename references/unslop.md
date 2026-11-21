@@ -2,6 +2,13 @@
 
 Generated interfaces share recognisable tells. Each item below explains the tell, why it hurts, and what to do instead. Run this list on any UI that was produced quickly or by a model.
 
+## How to run it
+
+- **Start from references.** Ask for (or find) reference designs, screenshots or sites the user likes, and match their decisions. Generic output comes from designing without a target.
+- **Judge the rendered page, not the code.** Open it in a real browser, screenshot it at mobile and desktop widths, and review the screenshots against this list. Many tells (uneven spacing, misaligned edges, off-centre text) are only visible when rendered.
+- **Polish pass.** Fix the small things that look slightly off: spacing that isn't on the scale, edges that don't line up, mixed radii, icons that sit low.
+- **Pre-launch check.** Before the page goes live, go through every item below on the final screens.
+
 ## Delete filler badges
 
 **Tell:** "New", "AI-powered", "✨ Beta", "Featured" pills on headings and cards that carry no real information.

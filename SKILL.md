@@ -20,13 +20,15 @@ This file is the index. **Before implementing anything in a section, read its re
 
 ## Workflow
 
-1. Identify the stack and the existing design tokens (colours, spacing, radii, fonts, motion). Extend them; don't invent a parallel system.
+1. Identify the stack and the existing design tokens (colours, spacing, radii, fonts, motion). Extend them; don't invent a parallel system. If the user has reference designs, screenshots or sites they like, treat them as the target look and match their spacing, type and colour decisions rather than defaulting to generic choices.
 2. Find the surfaces: buttons, menus, modals, lists, forms, navigation, loading, empty, error and success states.
 3. For each section that applies, read its reference and note where principles are missing or violated. Skip what doesn't apply.
 4. Fix in this order: broken responsiveness and layout shift, accessibility (contrast, targets, focus, reduced motion), the un-slop checklist, typography and colour, then motion polish.
 5. Respect `prefers-reduced-motion`, `prefers-contrast` and forced colours (or the platform equivalents).
-6. Verify in the running app where possible (DevTools Performance and Animations panels, a contrast checker, keyboard-only use).
-7. Report a short before/after list: principle, where, what changed.
+6. Verify in the running app, not just the code: open it in a real browser, screenshot it at mobile and desktop widths, and compare against the reference and these principles. Use DevTools Performance and Animations panels, a contrast checker and keyboard-only use.
+7. Polish pass: look at the screenshots for things that are slightly off (uneven spacing, edges that don't line up, inconsistent radii, text that sits off-centre) and fix them. These are easy to miss and make a big difference.
+8. Pre-launch check: run the un-slop checklist one last time on the finished screens to catch any remaining signs that the design was AI-generated.
+9. Report a short before/after list: principle, where, what changed.
 
 ## Motion and interaction (details: references/motion.md)
 
