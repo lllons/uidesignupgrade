@@ -596,11 +596,242 @@ def peak_end(p, t, a):
     return "Ends flat" if not a else "Ends on a win"
 
 
+def mix(c1, c2, k):
+    x, y = rgba(c1), rgba(c2)
+    return "#" + "".join(f"{round(lerp(x[i], y[i], clamp(k))):02x}" for i in range(3))
+
+
+def chevron(p, x, y, ang, c):
+    p.line([(x + px * math.cos(ang) - py * math.sin(ang), y + px * math.sin(ang) + py * math.cos(ang))
+            for px, py in ((-4, -2), (0, 2), (4, -2))], c, 2)
+
+
+def scale_097(p, t, a):
+    tap = 0.15
+    for i in range(3):
+        p.rect(24, 48 + i * 30, 200 - i * 40, 66 + i * 30, "#ffffff", 6, 0.08)
+    sc_btn = 0.97 if a and tap <= t < tap + 0.03 else 1
+    p.card(150 - 46 * sc_btn, 172 - 15 * sc_btn, 150 + 46 * sc_btn, 172 + 15 * sc_btn, VIOLET, 10)
+    p.text(150, 171, "Publish", "#ffffff", 11, True)
+    if t >= tap + 0.02:
+        k = seg(t, tap + 0.02, tap + 0.14)
+        sc, al = (lerp(0.97, 1, ease_out(k)), ease_out(k)) if a else (ease(k), 1.0)
+
+        def m(x, y): return 150 + (x - 150) * sc, 96 + (y - 96) * sc
+        p.card(*m(60, 46), *m(240, 146), CARD, 12 * sc, al)
+        if sc > 0.5:
+            p.text(*m(150, 68), "Publish this page?", DARK, max(4, round(12 * sc)), True, al)
+        p.rect(*m(84, 84), *m(216, 90), BAR2, 3, al)
+        p.rect(*m(104, 96), *m(196, 102), BAR2, 3, al)
+        p.rect(*m(84, 116), *m(146, 134), "#e2e8f0", 8, al)
+        p.rect(*m(154, 116), *m(216, 134), VIOLET, 8, al)
+    cx, cy = along(t, [(0.0, tap - 0.02, (240, 205), (160, 175))])
+    p.cursor(cx, cy)
+    p.ripple(cx, cy, t - tap)
+    return "Zooms up from a dot" if not a else "Scale from 0.97 + fade"
+
+
+def directional(p, t, a):
+    taps = ((0.15, 1, (211, 169)), (0.4, 1, (211, 169)), (0.65, -1, (89, 169)))
+    step, prev, k, dirn = 0, 0, 1.0, 1
+    for tt, d, _ in taps:
+        if t >= tt:
+            prev, step, dirn, k = step, step + d, d, ease_out(seg(t, tt, tt + 0.12))
+    p.card(30, 40, 270, 190, CARD, 14)
+    names, cols = ("Account", "Profile", "Invite team"), (CYAN, PINK, AMBER)
+    # old step is gone before the new one is half in, so the two never overlap legibly
+    for s_, al, dx in ((prev, 1 - seg(k, 0, 0.45), -dirn * 60 * k), (step, seg(k, 0.35, 1), dirn * 60 * (1 - k))):
+        if al > 0.01:
+            dx = dx if a else 0
+            p.circle(150 + dx, 74, 16, cols[s_], al)
+            p.text(150 + dx, 104, f"Step {s_ + 1}: {names[s_]}", DARK, 12, True, al)
+            p.rect(96 + dx, 118, 204 + dx, 124, BAR2, 3, al)
+    for i in range(3):
+        p.circle(132 + i * 18, 142, 4, VIOLET if i == step else BAR2)
+    p.rect(60, 158, 118, 180, "#e2e8f0", 9)
+    p.text(89, 168, "Back", DARK, 10, True)
+    p.rect(182, 158, 240, 180, VIOLET, 9)
+    p.text(211, 168, "Next", "#ffffff", 10, True)
+    for tt, _, pos in taps:
+        p.ripple(*pos, t - tt)
+    return "Every step just fades" if not a else "Next slides left, Back slides right"
+
+
+def smooth_height(p, t, a):
+    t_open, t_close = 0.15, 0.6
+    if a:
+        k = ease(seg(t, t_open, t_open + 0.12)) - ease(seg(t, t_close, t_close + 0.12))
+    else:
+        k = 1.0 if t_open <= t < t_close else 0.0
+    ext = 48 * k
+    p.card(40, 40, 260, 144 + ext, CARD, 12)
+    for i, q in enumerate(("How do refunds work?", "Can I change plans later?", "Do you offer a free trial?")):
+        y = 48 + i * 30 + (ext if i else 0)
+        if i:
+            p.rect(52, y - 1, 248, y, "#e2e8f0", 0)
+        p.text(56, y + 15, q, DARK, 10, i == 0 and k > 0.5, anchor="lm")
+        chevron(p, 240, y + 15, math.pi * k if i == 0 else 0, DARK)
+    if ext > 8:
+        al = clamp((ext - 8) / 30)
+        p.rect(56, 82, 236, 88, BAR2, 3, al)
+        p.rect(56, 94, 200, 100, BAR2, 3, al)
+        if ext > 30:
+            p.rect(56, 106, 170, 112, BAR2, 3, al)
+    p.ripple(200, 63, t - t_open)
+    p.ripple(200, 63, t - t_close)
+    return "Snaps open, rows jump" if not a else "Animates to its natural height"
+
+
+def theme_switch(p, t, a):
+    taps = (0.15, 0.55)
+
+    def dark_k(dur):  # 0 = light, 1 = dark
+        v = 0.0
+        for i, tt in enumerate(taps):
+            if t >= tt:
+                to = 1.0 if i % 2 == 0 else 0.0
+                v = lerp(1 - to, to, 1.0 if dur == 0 else ease(seg(t, tt, tt + dur)))
+        return v
+    kb, kt, kc = (dark_k(d) for d in ((0, 0, 0) if a else (0.1, 0.04, 0.17)))  # bg 300 ms, text 120 ms, chart 500 ms
+    p.card(36, 40, 264, 190, mix(CARD, "#1e293b", kb), 14)
+    p.text(56, 62, "Revenue this week", mix("#64748b", MUTED, kt), 10, anchor="lm")
+    p.text(56, 86, "$48,210", mix(DARK, INK, kt), 20, True, anchor="lm")
+    for i, h in enumerate((20, 34, 26, 44, 38, 52, 30, 60, 48, 70)):
+        c = mix(BLUE, CYAN, kc) if i == 9 else mix(BAR2, "#475569", kc)
+        p.rect(58 + i * 19, 176 - h, 70 + i * 19, 176, c, 3)
+    knob = dark_k(0.04)
+    p.rect(222, 54, 252, 70, mix(BAR2, VIOLET, knob), 8)
+    p.circle(lerp(230, 244, knob), 62, 6, "#ffffff")
+    for tt in taps:
+        p.ripple(237, 62, t - tt)
+    return "Each part fades at its own speed" if not a else "Swap the whole theme instantly"
+
+
+def tooltip_delay(p, t, a):
+    labels, glyphs = ("Bold", "Italic", "Underline", "Strike", "Link", "Code"), ("B", "I", "U", "S", "#", "</>")
+    xs = [66 + i * 34 for i in range(6)]
+    hover = ((0.1, 0), (0.45, 1), (0.55, 2), (0.65, 3), (0.75, 4))
+    segs = [(0.0, 0.1, (150, 205), (xs[0], 122))]
+    segs += [(hover[j - 1][0] + 0.02, hover[j][0], (xs[hover[j - 1][1]], 122), (xs[hover[j][1]], 122)) for j in range(1, 5)]
+    cur, since = -1, 0.0
+    for tt, i in hover:
+        if t >= tt:
+            cur, since = i, t - tt
+    delay = 0.2  # 600 ms
+    p.card(48, 96, 252, 132, CARD, 10)
+    for i, (x, g) in enumerate(zip(xs, glyphs)):
+        if i == cur:
+            p.rect(x - 13, 101, x + 13, 127, "#e2e8f0", 6)
+        p.text(x, 113, g, DARK, 12, True)
+    if cur >= 0 and (since >= delay or (a and cur > 0)):
+        x, lbl = xs[cur], labels[cur]
+        w = font(10).getlength(lbl) / S + 16
+        al = 1.0 if (a and cur > 0) else seg(since, delay, delay + 0.03)
+        p.rect(x - w / 2, 68, x + w / 2, 88, DARK, 6, al)
+        p.poly([(x - 5, 88), (x + 5, 88), (x, 93)], DARK, al)
+        p.text(x, 77, lbl, INK, 10, a=al)
+    p.cursor(*along(t, segs))
+    return "Waits 600 ms on every button" if not a else "Skips the delay once one is open"
+
+
+def staging(p, t, a):
+    k = ease(seg(t, 0.2, 0.45))
+    pulse = math.sin(math.pi * seg(t, 0.2, 0.5))
+    cards = ((30, 44, 144, 112, PINK), (156, 44, 270, 112, CYAN), (30, 124, 144, 192, AMBER), (156, 124, 270, 192, EMERALD))
+    focus = 1
+    order = [i for i in range(4) if i != focus] + [focus]
+    for i in order:
+        x0, y0, x1, y1, c = cards[i]
+        if a:
+            g, al = (8 * k, 1.0) if i == focus else (0, 1 - 0.65 * k)
+        else:
+            g, al = 4 * pulse, 1.0
+        p.card(x0 - g, y0 - g, x1 + g, y1 + g, CARD, 12, al)
+        p.circle(x0 + 20, y0 + 20, 9, c, al)
+        p.rect(x0 + 36, y0 + 16, x1 - 16, y0 + 24, BAR, 4, al)
+        p.rect(x0 + 14, y0 + 40, x1 - 30, y0 + 46, BAR2, 3, al)
+        p.rect(x0 + 14, y0 + 52, x1 - 50, y0 + 58, BAR2, 3, al)
+    return "Everything competes for attention" if not a else "One thing at a time"
+
+
+def layout_shift(p, t, a):
+    load, click = 0.4, 0.45
+    loaded = t >= load
+    text_y = 134 if (a or loaded) else 66
+    p.card(40, 36, 260, 196, CARD, 12)
+    p.rect(56, 46, 200, 56, BAR, 4)
+    if a:
+        p.rect(56, 64, 244, 124, "#e2e8f0", 8)
+    if loaded:
+        al = seg(t, load, load + 0.08) if a else 1.0
+        p.rect(56, 64, 244, 124, BLUE, 8, al)
+        p.circle(92, 84, 9, AMBER, al)
+        p.poly([(56, 124), (110, 94), (150, 114), (190, 96), (244, 120), (244, 124)], EMERALD, al)
+    for i, w in enumerate((180, 160, 120)):
+        p.rect(56, text_y + i * 10, 56 + w, text_y + i * 10 + 5, BAR2, 3)
+    btn_y = text_y + 36
+    hit = t >= click and a
+    p.rect(56, btn_y, 140, btn_y + 20, EMERALD if hit else VIOLET, 10)
+    p.text(98, btn_y + 9, "Read more", "#ffffff", 10, True)
+    target = (100, 180) if a else (100, 112)
+    cx, cy = along(t, [(0.05, 0.38, (220, 205), target)])
+    p.cursor(cx, cy)
+    p.ripple(cx, cy, t - click)
+    if t >= click:
+        p.text(250, 21, "Clicked" if a else "Missed!", EMERALD if a else RED, 12, True, anchor="rm")
+    return "Image loads, button jumps away" if not a else "Space reserved, nothing moves"
+
+
+def reserved_bold(p, t, a):
+    tabs, fs = ("Overview", "Customers", "Settings"), 15
+    active = 0
+    for tt, i in ((0.15, 1), (0.4, 2), (0.65, 0)):
+        if t >= tt:
+            active = i
+
+    def wd(s, b): return font(fs, b).getlength(s) / S
+    stable = [max(wd(s, True), wd(s, False)) + 22 for s in tabs]
+    widths = stable if a else [wd(s, i == active) + 22 for i, s in enumerate(tabs)]
+    x = 150 - sum(widths) / 2
+    p.card(x - 6, 86, x + sum(widths) + 6, 124, CARD, 10)
+    for i, s in enumerate(tabs):
+        if i == active:
+            p.rect(x + 3, 91, x + widths[i] - 3, 119, "#ede9fe", 7)
+        p.text(x + widths[i] / 2, 104, s, VIOLET if i == active else "#475569", fs, i == active)
+        x += widths[i]
+    x0 = 150 - sum(stable) / 2
+    centers = [x0 + sum(stable[:i]) + stable[i] / 2 for i in range(3)]
+    cx, cy = along(t, [(0.02, 0.14, (150, 200), (centers[1], 108)), (0.27, 0.39, (centers[1], 108), (centers[2], 108)),
+                       (0.52, 0.64, (centers[2], 108), (centers[0], 108))])
+    p.cursor(cx, cy)
+    for tt in (0.15, 0.4, 0.65):
+        p.ripple(cx, cy, t - tt)
+    return "Bold text widens, tabs shift" if not a else "Width reserved for the bold state"
+
+
+def tabular_nums(p, t, a):
+    v = int(lerp(1000, 48210, ease(seg(t, 0.1, 0.8))))
+    s, fs = f"${v:,}", 26
+    prop = {"1": 0.42, "7": 0.5, "2": 0.55, "3": 0.55, "4": 0.62, "5": 0.55, "6": 0.58, "8": 0.58, "9": 0.58, "0": 0.6}
+    widths = [fs * (0.3 if ch == "," else 0.58 if ch == "$" else (0.6 if a else prop[ch])) for ch in s]
+    p.card(50, 60, 250, 170, CARD, 14)
+    p.text(70, 82, "Revenue", "#64748b", 10, anchor="lm")
+    x = 230 - sum(widths)
+    for ch, w in zip(s, widths):
+        p.text(x + w / 2, 118, ch, DARK, fs, True)
+        x += w
+    p.rect(176, 140, 230, 156, EMERALD, 8, 0.25)
+    p.text(203, 147, "+12.4%", "#059669", 9, True)
+    return "Digits change width: jittery" if not a else "Tabular figures: rock steady"
+
+
 SWATCH = (PINK, VIOLET, CYAN, AMBER, EMERALD, BLUE, RED, ORANGE, INK, MUTED, DARK, BAR, BAR2, "#ffffff",
           "#475569", "#64748b", "#e2e8f0", "#059669", "#e9d5ff", "#bfdbfe", "#334155")
 
 PRINCIPLES = [exaggeration, origin, staggering, squash, rubber, doherty, anticipation, fitts, easing,
-              hick, follow, arcs, restorff, timing, interruptible, secondary, frequency, peak_end]
+              hick, follow, arcs, restorff, timing, interruptible, secondary, frequency, peak_end,
+              scale_097, directional, smooth_height, theme_switch, tooltip_delay, staging, layout_shift,
+              reserved_bold, tabular_nums]
 
 
 def background():
