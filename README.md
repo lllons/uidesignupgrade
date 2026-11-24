@@ -72,8 +72,12 @@ Run the skill (`/uidesignupgrade` in Claude Code, or `/uidesignupgrade:uidesignu
   <img src="assets/brand/covers.png" width="760" alt="What's inside: motion, UX laws, typography, colour, un-slop and patterns">
 </p>
 
+It picks a mode from your request (full upgrade, audit only, one area, new build, screenshot critique, PR review or un-slop), so "audit my UI" won't edit files and "fix the typography" won't redesign the page.
+
 | Reference | Covers |
 |-----------|--------|
+| [audit.md](references/audit.md) | how the agent runs: finding your design system, ready-made search commands, priority levels, verification and the report |
+| [platforms.md](references/platforms.md) | the common fixes in Tailwind, Framer Motion, SwiftUI, Compose, Flutter and React Native |
 | [motion.md](references/motion.md) | every motion principle with tokens, code, mistakes and checks |
 | [ux-laws.md](references/ux-laws.md) | UX laws, layout, hit areas, layout shift, Gestalt principles |
 | [typography.md](references/typography.md) | type details with CSS, plus fonts by feeling |
