@@ -2,7 +2,20 @@
 
 Read this at the start of every run. It turns the principles into concrete steps: where to find the existing design system, which searches surface likely problems, how to rank them, how to check the result, and how to report it.
 
-All searches use `rg` (ripgrep). Always pass the path (`.`): without one, `rg` reads standard input when the shell is not a terminal and silently finds nothing. `rg` skips `.gitignore`d folders such as `node_modules` and build output. Without `rg`, use `git grep -nE` (or `grep -rnE --exclude-dir=node_modules`) with the same pattern; patterns marked `-P` need `git grep -nP` or `grep -rnP`. Run them from the project root.
+All searches use `rg` (ripgrep). Always pass the path (`.`): without one, `rg` reads standard input when the shell is not a terminal and silently finds nothing. `rg` skips `.gitignore`d folders such as `node_modules` and build output. Run them from the project root.
+
+**No `rg`?** (common on Windows: check with `rg --version`). Don't install anything; translate each command:
+
+| `rg` form | Fallback |
+|-----------|----------|
+| `rg -n "PATTERN" .` | `git grep -nE --untracked "PATTERN"` (inside a git repo; `--untracked` also searches new files) or `grep -rnE --exclude-dir={node_modules,dist,build,.git} "PATTERN" .` |
+| `rg -nP` / `rg -n` with `(?!`, `\x{...}` | `git grep -nP --untracked` or `grep -rnP ...` (ERE can't do lookaheads or `\x{}`) |
+| `rg -l` / `rg -c` | add `-l` / `-c` to the fallback |
+| `-g "*.css"` | `git grep ... -- "*.css"` or `grep ... --include="*.css"` |
+| `-g "!*.md"` | `git grep ... -- . ":!*.md"` or `grep ... --exclude="*.md"` |
+| `-i` | `-i` |
+
+If a search for something you can see in the code returns nothing, suspect the command (missing path, wrong quoting, ERE vs PCRE) before concluding the problem is absent.
 
 ## 1. Find the existing design system
 
@@ -52,11 +65,15 @@ rg -l "prefers-reduced-motion|useReducedMotion|motion-reduce:|accessibilityReduc
 rg -nP "<img(?![^>]*\b(width|height)=)" .
 # 100vh on mobile hides content behind browser bars
 rg -n "100vh|\bh-screen\b" .
-# Clickable divs and spans (no keyboard or screen-reader support)
-rg -nP "<(div|span)\b[^>]*\bonClick=" .
+# Clickable divs and spans (no keyboard or screen-reader support). -i: JSX uses onClick, HTML uses onclick
+rg -niP "<(div|span|li|td|img)\b[^>]*\b(onclick|@click|v-on:click|\(click\))=" .
+# Likely low-contrast text: light greys, translucent text, faded labels (confirm the real ratio in section 4)
+rg -n "text-(gray|zinc|slate|neutral|stone)-(200|300|400)\b|text-(white|black)/[1-5]0\b|color:\s*#(a1a1aa|9ca3af|bbb|ccc|aaa|d1d5db)\b|opacity:\s*0?\.[1-5]\b" .
+# Page background set at all? No output = text colour may land on an unexpected (even dark) canvas
+rg -n "(html|body|:root)\s*\{[^}]*background|<body[^>]*\bbg-" .
 ```
 
-Fixes: `:focus-visible` ring at 3:1 contrast (ux-laws.md, Affordance); remove the zoom lock; add the reduced-motion block (motion.md, Shared tokens); `width`/`height` or `aspect-ratio` (ux-laws.md, Layout shift); `100dvh` / `h-dvh` plus safe-area insets (ux-laws.md, Safe areas); `<button>` or `<a>`.
+Fixes: `:focus-visible` ring at 3:1 contrast (ux-laws.md, Affordance); remove the zoom lock; add the reduced-motion block (motion.md, Shared tokens); `width`/`height` or `aspect-ratio` (ux-laws.md, Layout shift); `100dvh` / `h-dvh` plus safe-area insets (ux-laws.md, Safe areas); `<button>` or `<a>`; a `--muted` token at 4.5:1 or more (typography.md, Text contrast); `body { background: var(--bg); color: var(--fg); }` set together.
 
 ### P1: generic AI look and design-system drift
 
@@ -92,13 +109,26 @@ rg -n "(transition|animation)[^;]*\blinear\b|\bease-linear\b" .
 rg -n "scale\(0\)|\bscale-0\b|scale:\s*0\s*[,}]" .
 # Animating layout properties
 rg -n "transition(-property)?:[^;]*\b(width|height|top|left|right|bottom|margin|padding)\b" .
-# Long routine animations (over 500 ms)
-rg -n "\bduration-(700|1000)\b|(transition|animation)[^;]*\b([6-9][0-9]{2}|[1-9][0-9]{3})ms" .
+# Long routine animations (over 500 ms), in ms or seconds (.6s, 0.8s, 1s, 1.5s)
+rg -n "\bduration-(700|1000)\b|(transition|animation)[^;]*(\b([6-9][0-9]{2}|[1-9][0-9]{3})ms|(^|[^.0-9])(0?\.[6-9][0-9]*|[1-9][0-9]*(\.[0-9]+)?)s\b)" .
+# Animating something that toggles display: none (the enter animation never plays)
+rg -n "display:\s*none" -g "*.{css,scss}" .
 # Scroll-triggered fade-ins (keep only where they explain something)
 rg -n "whileInView|data-aos|animate-on-scroll" .
 ```
 
-Fixes are in motion.md: exact property lists (Transform, not layout), ease-out tokens (Easing), start at 0.97, grid-rows or `interpolate-size` for height, durations under 500 ms (Timing), animate useful feedback only.
+Fixes are in motion.md: exact property lists (Transform, not layout), ease-out tokens (Easing), start at 0.97, grid-rows or `interpolate-size` for height, durations under 500 ms (Timing), animate useful feedback only. A `display: none` hit matters only when the same element also has a transition or animation: fix with `@starting-style` plus `allow-discrete` (motion.md, Scale from 0.97).
+
+### Responsive
+
+```sh
+# Large fixed text sizes with no responsive or fluid version (headlines overflow or break badly at 390 px)
+rg -n "\btext-(5xl|6xl|7xl|8xl|9xl)\b|font-size:\s*([4-9][0-9]|1[0-9]{2})px" .
+# Fixed-width columns that can't shrink
+rg -n "\bw-\[[0-9]{3,}px\]|\bwidth:\s*[3-9][0-9]{2}px" .
+```
+
+Confirm on the 390 px screenshot: a hit is fine if a breakpoint version (`md:text-6xl`) or `clamp()` exists. Fix with `clamp()` (typography.md, Fluid type) and a breakpoint that stacks rows and sidebars.
 
 ### P2: typography
 
@@ -160,15 +190,63 @@ Code that looks right can render wrong. Check the result in the running app when
    ```
 
 3. **Compare** with the reference and the un-slop list: spacing off the scale, edges that don't line up, mixed radii, text sitting low in buttons, icons off-centre. Fix, then screenshot again.
-4. **Accessibility:** run Lighthouse and fix every contrast and label failure, then tab through each screen (focus always visible, logical order, nothing unreachable).
+4. **Quick page check (no install).** If your browser tool can run JavaScript in the page, paste this at each width. It reports low-contrast text, text on gradients or images to check by eye, targets under 24 px, horizontal overflow, and a missing page background. It's a first pass: it can't see text over images, and translucent colours are estimated.
+
+   ```js
+   (() => {
+     const ctx = Object.assign(document.createElement('canvas'), { width: 1, height: 1 }).getContext('2d', { willReadFrequently: true });
+     const rgb = c => { ctx.clearRect(0, 0, 1, 1); ctx.fillStyle = c; ctx.fillRect(0, 0, 1, 1); // canvas also parses oklch(), lab(), color()
+       const [r, g, b, a] = ctx.getImageData(0, 0, 1, 1).data; return [r, g, b, a / 255]; };
+     const lum = c => rgb(c).slice(0, 3).map(v => (v /= 255) <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4)
+       .reduce((s, v, i) => s + v * [0.2126, 0.7152, 0.0722][i], 0);
+     const alpha = c => rgb(c)[3];
+     const bgOf = el => { for (; el; el = el.parentElement) { const s = getComputedStyle(el);
+       if (s.backgroundImage !== 'none') return null; if (alpha(s.backgroundColor) > 0) return s.backgroundColor; }
+       return 'rgb(255,255,255)'; };
+     const r = { overflowX: document.documentElement.scrollWidth > innerWidth,
+       noPageBackground: [document.documentElement, document.body].every(e => alpha(getComputedStyle(e).backgroundColor) === 0),
+       lowContrast: [], checkByEye: [], smallTargets: [] };
+     for (const el of document.querySelectorAll('body *')) {
+       const s = getComputedStyle(el), box = el.getBoundingClientRect();
+       if (!box.width || s.visibility === 'hidden') continue;
+       const label = (el.textContent.trim() || el.getAttribute('aria-label') || el.tagName).slice(0, 40);
+       if ([...el.childNodes].some(n => n.nodeType === 3 && n.textContent.trim())) {
+         const bg = bgOf(el);
+         if (!bg) r.checkByEye.push(label);
+         else {
+           const [a, b] = [lum(s.color), lum(bg)];
+           let ratio = (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+           if (alpha(s.color) < 1 || +s.opacity < 1) ratio = Math.min(ratio, 1 + (ratio - 1) * alpha(s.color) * s.opacity);
+           const large = parseFloat(s.fontSize) >= 24 || (parseFloat(s.fontSize) >= 18.66 && +s.fontWeight >= 700);
+           if (ratio < (large ? 3 : 4.5)) r.lowContrast.push({ text: label, ratio: +ratio.toFixed(2) });
+         }
+       }
+       if (el.matches('a, button, input, select, textarea, summary, [onclick], [role=button], [tabindex]:not([tabindex="-1"])')
+           && (box.width < 24 || box.height < 24)) r.smallTargets.push({ el: label, w: Math.round(box.width), h: Math.round(box.height) });
+     }
+     return r;
+   })()
+   ```
+
+   Every array should be empty and both flags `false`. `noPageBackground: true` means the page relies on the browser's canvas colour: dark-mode browsers and embedded webviews can show your dark text on a dark canvas. Set `body { background; color }` together.
+
+5. **Accessibility:** run Lighthouse if it's available (it downloads Chromium tooling the first time, so ask before installing it in a project that doesn't have it), then tab through each screen (focus always visible, logical order, nothing unreachable).
 
    ```sh
    npx lighthouse http://localhost:3000 --only-categories=accessibility --quiet --chrome-flags="--headless" --output=json --output-path=a11y.json
    ```
 
-5. **Motion:** check durations in the DevTools Animations panel; emulate `prefers-reduced-motion: reduce` (DevTools > Rendering) and confirm feedback still happens without movement; click quickly during transitions to confirm they reverse instead of queueing.
-6. **Layout shift:** reload with network throttling; nothing should jump (Lighthouse also reports CLS).
-7. **Dark mode and narrow widths**, if the app supports them.
+6. **Motion:** check durations in the DevTools Animations panel; emulate `prefers-reduced-motion: reduce` (DevTools > Rendering) and confirm feedback still happens without movement; click quickly during transitions to confirm they reverse instead of queueing. To prove an enter animation actually plays, read the computed style about 60 ms after opening: `opacity` should be between 0 and 1, not already 1.
+7. **Layout shift:** reload with network throttling; nothing should jump. CLS alone can read near 0 when nothing sits below the late content, so also measure the container itself:
+
+   ```js
+   const h = () => Math.round(document.querySelector('#orders').getBoundingClientRect().height); // your late-loading container
+   const before = h(); await new Promise(r => setTimeout(r, 3000)); ({ before, after: h() })   // must be equal
+   ```
+
+   A skeleton row must match the height of a **loaded** row, including its tallest child (a 44 px icon button makes the row 44 px plus padding).
+8. **Narrow widths:** at 390 px, `overflowX` from step 4 must be `false`, sidebars and stat rows must stack, and headlines should fit in about four lines without breaking words.
+9. **Dark mode**, if the app supports it.
 
 Native apps: screenshots from the simulator or emulator (`xcrun simctl io booted screenshot out.png`, `adb exec-out screencap -p > out.png`), Accessibility Inspector or Android Accessibility Scanner, and the platform's reduce-motion and larger-text settings.
 

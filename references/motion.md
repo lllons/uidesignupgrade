@@ -73,6 +73,20 @@ Better still, swap movement for a short opacity fade rather than removing feedba
 
 Exits can be faster (about 150 ms) and can skip the scale.
 
+**Elements that toggle `display: none`** (a class like `.open` that switches `display`): a plain transition never plays, because the element has no "before" frame. Use `@starting-style` for the enter frame and `allow-discrete` so `display` waits for the exit:
+
+```css
+.menu {
+  display: none; opacity: 0; transform: scale(0.97); transform-origin: top left;
+  transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out),
+              display var(--dur-base) allow-discrete;
+}
+.menu.open { display: block; opacity: 1; transform: scale(1); }
+@starting-style { .menu.open { opacity: 0; transform: scale(0.97); } }
+```
+
+Browsers without `@starting-style` just show the menu instantly, which is fine. For `<dialog>` and `[popover]`, also transition `overlay ... allow-discrete`.
+
 **Avoid:** `scale(0)`, `scale(0.5)`, bouncy overshoot on dialogs that contain forms.
 
 **Check:** Pause mid-animation. Is the content already legible?

@@ -1,7 +1,7 @@
 {
   "name": "uidesignupgrade",
   "displayName": "UI Design Upgrade",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "icon": ".claude-plugin/icon.png",
   "description": "Upgrade an app or website UI with a library of UX, animation, typography and un-slop principles, with before/after examples.",
   "author": { "name": "lllons", "url": "https://github.com/lllons" },

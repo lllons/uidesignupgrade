@@ -81,7 +81,7 @@ Write a short list of what is on screen: buttons, inputs, menus, modals, lists, 
 
 ## Step 4: Detect
 
-1. Run the search commands in audit.md section 2 from the project root (always pass `.` as the path).
+1. Run the search commands in audit.md section 2 from the project root (always pass `.` as the path). No `rg` installed? Use the fallback table at the top of audit.md; don't skip the searches.
 2. **Open every hit and confirm it before calling it a problem.** Searches find leads, not verdicts.
 3. For each area that applies, read its reference and compare the rendered UI against it.
 4. Check what searches can't find (contrast on real backgrounds, spacing, alignment, hierarchy) on the screenshots.
@@ -97,6 +97,9 @@ How to confirm a hit (real problem vs. false positive):
 | `backdrop-blur` | decoration on a flat card | a sticky header or sheet that really overlays content |
 | `scale-0` | an element entering from a dot | a collapsed element that's also `opacity-0` and never animates in |
 | hex colours in a file | component files with many literals | the token file itself, SVG icons, test fixtures |
+| `display: none` | the same element also has a transition (it will never animate in) | an element that just hides, with no transition |
+| `text-gray-400` | body text or labels on white | disabled controls, placeholder text, decorative dividers |
+| `text-6xl` | no `sm:`/`md:` version or `clamp()` next to it | `text-4xl md:text-6xl` |
 
 ## Step 5: Rank
 
@@ -125,7 +128,8 @@ Put every confirmed finding in one level, then fix in order (finish P0 before st
 - **Reuse existing components.** Don't restyle a button locally on one page.
 - **Use what's installed.** CSS and the platform can do almost everything here; no new libraries without asking.
 - **Every animation you add** gets a reduced-motion path and animates only `transform` and `opacity`.
-- **Stay in presentation.** Styles, tokens, semantic markup and UI states only. Never touch data fetching, state management or business rules.
+- **Stay in presentation.** Styles, tokens, semantic markup and UI states only. Never touch data fetching, state management or business rules. How a value is **displayed** is presentation: formatting `12908.98` as `$12,908.98` with `Intl.NumberFormat` (or the platform formatter) is in scope; changing the value is not.
+- **Fix at both widths.** A fix that looks right at 1440 can overflow at 390. Rows of cards and sidebars need a breakpoint that stacks them; big headlines need `clamp()`.
 - **Keep diffs reviewable.** Group by principle. Don't reformat or rename code you aren't changing.
 
 Good vs. bad fixes:
@@ -156,11 +160,12 @@ Good vs. bad fixes:
 Look at the result; reading the code is not enough. Follow audit.md section 4:
 
 1. Screenshot again at 390 and 1440; compare with "before" and the reference.
-2. Lighthouse accessibility; fix every contrast and label failure.
+2. Run the quick page check script (audit.md section 4, step 4) at both widths: contrast, small targets, horizontal overflow, missing page background. Lighthouse too if it's available.
 3. Tab through every screen: focus always visible, order logical, nothing unreachable.
 4. Emulate `prefers-reduced-motion: reduce`: feedback still happens without movement.
-5. Click fast during transitions: they reverse, they don't queue.
-6. Dark mode and narrow widths, if the app has them.
+5. Click fast during transitions: they reverse, they don't queue. Confirm enter animations really play (computed `opacity` mid-way is between 0 and 1).
+6. Measure late-loading containers before and after data arrives: the height must not change.
+7. Dark mode, if the app has it.
 
 **If you can't run something, say exactly what is unverified.** Never write "looks great" about a screen you did not see.
 
@@ -192,6 +197,10 @@ Use the template in audit.md section 5. List only what changed and what needs a 
 | "The page now looks clean and modern" (unseen) | "Verified at 390 and 1440" or "Not verified: couldn't start the dev server" |
 | A typography request turning into a redesign | fix typography + P0s; list the rest in the report |
 | Editing files in Audit only or Critique mode | report only; offer to apply fixes at the end |
+| "No hits, so no problem" when the search command itself failed | check the command first (missing `rg`, ERE vs PCRE, `onClick` vs `onclick`); see audit.md fallback table |
+| A skeleton shorter than the loaded row | match the loaded row's height, including its tallest child; measure before and after |
+| Checking only the desktop screenshot | check 390 px too: horizontal overflow, stacked layout, headline size |
+| Adding a transition to an element that toggles `display: none` | `@starting-style` + `allow-discrete` (motion.md), or the animation never plays |
 
 ---
 

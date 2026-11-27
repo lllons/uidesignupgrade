@@ -88,7 +88,7 @@ Then the components:
 + "outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 transition-[transform,background-color] duration-(--dur-fast) ease-(--ease-out) active:scale-[0.97] ..."
 ```
 
-Table: skeleton rows with the same row height while loading; an empty state using the existing `EmptyState` component ("No orders yet" + "Create an order" button). Icon buttons `size-7` → `size-11` with the icon still `size-4`. Dropdown: `origin-(--radix-dropdown-menu-content-transform-origin)` plus fade from `scale-[0.97]`.
+Table: skeleton rows with the same height as a **loaded** row (measured: 44 px button + 20 px padding = 64 px; a first try with 24 px cells made the table grow by 60 px when data landed); an empty state using the existing `EmptyState` component ("No orders yet" + "Create an order" button). Icon buttons `size-7` → `size-11` with the icon still `size-4`. Dropdown: `origin-(--radix-dropdown-menu-content-transform-origin)` plus fade from `scale-[0.97]`.
 
 Not touched: the data hooks, the chart library, the sidebar structure.
 

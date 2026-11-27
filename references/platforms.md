@@ -45,7 +45,7 @@ When reduced motion is on, replace movement and scale with a short opacity fade;
 
 | Stack | Code |
 |-------|------|
-| CSS | `@starting-style { .menu { opacity: 0; transform: scale(0.97); } }` on an element with a transition |
+| CSS | `@starting-style { .menu.open { opacity: 0; transform: scale(0.97); } }` on an element with an opacity/transform transition. If it toggles `display: none`, also transition `display ... allow-discrete` (full snippet: motion.md, Scale from 0.97) |
 | Framer Motion | `initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.97 }}` |
 | SwiftUI | `.transition(.scale(scale: 0.97).combined(with: .opacity))` |
 | Compose | `AnimatedVisibility(enter = fadeIn() + scaleIn(initialScale = 0.97f), exit = fadeOut() + scaleOut(targetScale = 0.97f))` |
