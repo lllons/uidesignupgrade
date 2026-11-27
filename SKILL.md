@@ -1,66 +1,205 @@
 ---
 name: uidesignupgrade
-description: Upgrade an app or website UI with a growing library of UX, animation, typography, colour and "un-slop" principles (motion like origin awareness, staggering, easing and interruptible motion; UX laws like Fitts's, Hick's, Miller's and Jakob's; typography details like tabular numbers, text-box trim and line length; colour theory like OKLCH, contrast and perceptual scales; researched patterns like slide-in carts; and a checklist for removing generic AI-generated design). Includes an audit playbook (search commands, priorities, verification, report) and Tailwind, SwiftUI, Compose, Flutter and React Native equivalents. Use when the user runs /uidesignupgrade, or asks to make a UI feel more polished, alive, responsive, premium or less AI-generated, audit or review a UI, screenshot or design PR, add micro-interactions, fix typography, colour, spacing or accessibility, pick fonts, design App Store screenshots, or audit motion and interaction quality.
+description: Upgrade an app or website UI with a growing library of UX, animation, typography, colour and "un-slop" principles (motion like origin awareness, staggering, easing and interruptible motion; UX laws like Fitts's, Hick's, Miller's and Jakob's; typography details like tabular numbers, text-box trim and line length; colour theory like OKLCH, contrast and perceptual scales; researched patterns like slide-in carts; and a checklist for removing generic AI-generated design). Includes an audit playbook (search commands, priorities, verification, report), worked examples for every mode, and Tailwind, SwiftUI, Compose, Flutter and React Native equivalents. Use when the user runs /uidesignupgrade, or asks to make a UI feel more polished, alive, responsive, premium or less AI-generated, audit or review a UI, screenshot or design PR, add micro-interactions, fix typography, colour, spacing or accessibility, pick fonts, design App Store screenshots, or audit motion and interaction quality.
 ---
 
 # UI Design Upgrade
 
-Audit the target UI (code, screenshots or a running app) against the principles below, then apply the upgrades that fit. Work in the project's existing stack and tools (CSS, Tailwind, Framer Motion, SwiftUI, Flutter, Compose, etc.). Do not add a library if the platform can already do it.
+You are improving the **presentation** of an existing UI: how it looks, moves and reads. You are not changing what it does. Every run follows the same shape:
 
-This file is the index. **Before implementing anything in a section, read its reference file** (paths are relative to this file). The references explain what each principle is, why it works, exact values and code, common mistakes and how to check the result. Don't load every reference up front: read [audit.md](references/audit.md) first, then only the ones the task touches.
+> **pick the mode → read the project → detect → rank → fix (if the mode allows) → verify → report**
 
-| Section | Reference | Read it when |
-|---------|-----------|--------------|
-| Audit playbook | [references/audit.md](references/audit.md) | **every run, first**: find the design system, search commands that surface problems, priority levels, verification, report template |
-| Platform equivalents | [references/platforms.md](references/platforms.md) | the project isn't plain CSS: Tailwind, Framer Motion, SwiftUI, Compose, Flutter, React Native versions of the common fixes |
-| Motion and interaction | [references/motion.md](references/motion.md) | adding or changing any animation, transition or gesture |
-| UX laws and layout | [references/ux-laws.md](references/ux-laws.md) | laying out screens, sizing targets, designing choices, forms and loading |
-| Typography and fonts | [references/typography.md](references/typography.md) | setting or reviewing text, choosing fonts |
-| Colour | [references/color.md](references/color.md) | building a palette, dark mode, charts or checking contrast |
-| Un-slop checklist | [references/unslop.md](references/unslop.md) | reviewing anything that looks generic or AI-generated |
-| Patterns | [references/patterns.md](references/patterns.md) | building add-to-cart, sign-up/password, App Store screenshots or pricing |
+This file tells you what to do and in what order. The detail lives in reference files (paths are relative to this file). **Read a reference before you change anything in its area**, and read only the ones the task touches.
 
-## Pick the mode
+| File | Read it when |
+|------|--------------|
+| [references/audit.md](references/audit.md) | **every run, first.** Where tokens live, ready-made search commands, priority levels, verification steps, report template |
+| [references/examples.md](references/examples.md) | **every run, after audit.md: read the example for your mode.** Worked runs showing exactly what good output looks like |
+| [references/platforms.md](references/platforms.md) | the project isn't plain CSS: Tailwind, Framer Motion, SwiftUI, Compose, Flutter, React Native |
+| [references/motion.md](references/motion.md) | adding or changing any animation, transition or gesture |
+| [references/ux-laws.md](references/ux-laws.md) | layout, target sizes, choices, forms, loading, layout shift |
+| [references/typography.md](references/typography.md) | setting or reviewing text, choosing fonts |
+| [references/color.md](references/color.md) | palettes, dark mode, charts, contrast |
+| [references/unslop.md](references/unslop.md) | anything that looks generic or AI-generated |
+| [references/patterns.md](references/patterns.md) | add-to-cart, sign-up/password, App Store screenshots, pricing |
 
-Work out which of these the user asked for before touching code. If it's unclear and the difference matters (audit only vs. change code), ask one short question; otherwise use the closest match.
+---
 
-| The user says | Mode | Do | Don't |
-|---------------|------|----|-------|
-| "upgrade / polish / improve the UI", `/uidesignupgrade` with no detail | **Full upgrade** | the whole workflow below on the main screens | redesign the brand or rewrite copy without asking |
-| "audit", "review", "what's wrong with", "rate my UI" | **Audit only** | steps 1–4 and the report; list fixes by priority | edit files |
-| "fix the typography / colours / animations / spacing" | **Targeted** | that area's reference, plus any P0 issue you find | drift into other areas; mention them in the report instead |
-| "build / design a new page, screen or component" | **New build** | apply the principles while building: tokens first, the un-slop list as constraints, then verify | invent a second design system next to the existing one |
-| a screenshot, mockup or URL with no code | **Critique** | review the image against the references; give concrete, numbered fixes with values | claim things about code you haven't seen |
-| a diff, branch or PR | **Review** | run the detectors on changed files only; comment by priority | expand scope beyond the diff |
-| "less AI-looking", "generic", "slop" | **Un-slop** | unslop.md item by item on rendered screens, then typography and colour | add decoration to make it feel "designed" |
+## Step 0: Pick the mode
 
-## Workflow
+Decide the mode from the user's words **before touching any file**. The mode decides whether you may edit, and how wide you may go.
 
-1. **Read the project.** Identify the stack and find the existing design tokens (audit.md, section 1): fonts, type scale, spacing, radii, shadows, colour roles, motion values, dark mode. Extend them; never invent a parallel system. Find the target look: reference designs, screenshots or sites the user likes, or the strongest existing screen. Match its spacing, type and colour decisions rather than defaulting to generic choices.
-2. **Capture "before".** If you can run the app, screenshot the screens in scope at 390 px and 1440 px wide (audit.md, section 4). You'll compare against these at the end.
-3. **List the surfaces.** Buttons, menus, modals, lists, forms, navigation, and the loading, empty, error and success states. Note which states are missing entirely.
-4. **Detect.** Run the search commands in audit.md section 2, then read the reference for each area that applies and note where principles are missing or violated. Confirm every search hit in the file before treating it as a problem. Skip what doesn't apply.
-5. **Rank.** Sort findings into P0 broken, P1 generic or inconsistent, P2 craft, P3 polish (audit.md, section 3). Fix in that order and finish each level before the next. Anything that needs the user's OK (brand change, copy rewrite, new dependency, removing a section) goes in a "Proposed" list instead of being done.
-6. **Fix.** Make small, focused edits through the tokens: change a token rather than twenty call sites, and reuse existing components rather than restyling them per page. For non-CSS stacks, use platforms.md. Respect `prefers-reduced-motion`, `prefers-contrast` and forced colours (or the platform equivalents) in everything you add.
-7. **Verify in the running app**, not just the code: screenshot again at both widths, run the accessibility check, tab through with the keyboard, emulate reduced motion, and click quickly through transitions (audit.md, section 4). If you can't run it, say exactly what is unverified.
-8. **Polish pass.** Look at the "after" screenshots for things that are slightly off: uneven spacing, edges that don't line up, inconsistent radii, text sitting low in buttons, icons off-centre. Fix them; they make a big difference.
-9. **Pre-launch check.** Run the un-slop checklist one last time on the finished screens to catch remaining signs that the design was AI-generated.
-10. **Report** using the template in audit.md section 5: what you matched, how you verified, a table of level / principle / where / change, and what's proposed but not done.
+| The user says | Mode | Edit files? | Scope |
+|---------------|------|-------------|-------|
+| "upgrade / polish / improve the UI", or `/uidesignupgrade` alone | **Full upgrade** | yes | main screens, all areas, P0 → P3 |
+| "audit", "review my UI", "what's wrong with", "rate", "critique my app" | **Audit only** | **no** | everything; output is a ranked report |
+| "fix the typography / colours / animations / spacing / buttons" | **Targeted** | yes | that one area, plus any P0 you find |
+| "build / design a new page, screen or component" | **New build** | yes | the new thing only, built on existing tokens |
+| a screenshot, mockup, Figma frame or URL, **no code** | **Critique** | no (nothing to edit) | what is visible in the image |
+| a diff, branch or PR | **Review** | no, unless asked to fix | changed lines only |
+| "less AI-looking", "generic", "slop", "looks like a template" | **Un-slop** | yes | unslop.md list first, then type and colour |
 
-## Common agent mistakes
+Rules for choosing:
 
-- **Adding a library** (Framer Motion, GSAP, a font loader, a colour package) for something CSS or the platform already does. Use what's installed.
-- **Hard-coding values** in components instead of adding or changing a token, so the fix doesn't spread and drift gets worse.
-- **Motion everywhere.** Animating every hover and scroll reveal. Only animate feedback and state changes; frequent actions stay instant.
-- **Breaking accessibility for looks:** removing focus rings, lowering contrast for a "subtle" feel, disabling zoom, tiny icon buttons.
-- **Changing the brand** (fonts, colours, voice) because a reference file lists better fonts. Keep the brand unless the user asks.
-- **Swapping one generic look for another:** replacing a purple gradient with a teal gradient, or Inter with another overused font.
-- **Only the happy path:** polishing the populated screen and leaving loading, empty and error states blank.
-- **Claiming visual results without looking.** If you didn't render it, you don't know it looks right.
-- **Scope creep:** a typography request turning into a redesign. Report other issues; don't fix them unasked.
-- **Touching logic:** changing data fetching, state management or business rules while restyling. UI only.
+- **Ambiguous between editing and not editing?** Ask one short question ("Do you want a report, or should I make the changes?"). Every other ambiguity: pick the closest mode and say which one you picked in the first line of your reply.
+- **More than one fits?** The narrower one wins. "Fix the typography on the pricing page" is Targeted, not Full upgrade.
+- **No running app and no code?** You are in Critique, whatever else they said.
 
-## Motion and interaction (details: references/motion.md)
+Examples:
+
+| Request | Mode | Why |
+|---------|------|-----|
+| "Can you make our dashboard feel more premium?" | Full upgrade | broad "make it better", code present |
+| "Be brutal, what's wrong with my landing page?" | Audit only | asks for judgement, not changes |
+| "The numbers in the table jump around when they update" | Targeted (typography) | one concrete symptom: tabular numbers |
+| "Add a settings screen that matches the rest of the app" | New build | new surface, existing system |
+| *(image attached)* "thoughts?" | Critique | image only |
+| "Review PR #42 for UI issues" | Review | a diff |
+| "It looks like every other AI SaaS site" | Un-slop | the generic look is the complaint |
+
+---
+
+## Step 1: Read the project
+
+Goal: know the existing system well enough that every change you make **extends it instead of inventing a second one**.
+
+1. Identify the stack (framework, styling method, component library, platform).
+2. Find the tokens with the commands in audit.md section 1. Write down: fonts and weights, type scale, spacing scale, radii, shadows, colour roles, motion durations and easings, dark mode yes/no.
+3. Find the target look, in this order: a reference the user gave → a site or app the user named → the strongest existing screen in the project. If the change is visual and there is no reference at all, ask once; if they have none, use the strongest existing screen.
+
+**Done when** you can name each token category (or note "none") and say what look you are matching.
+
+> Example note to yourself: *"Next.js 15 + Tailwind v4. Tokens in `app/globals.css` `@theme`: font `--font-sans: "Söhne"`, spacing default Tailwind, radii `--radius-sm 6px / --radius 10px / --radius-lg 16px`, colours in oklch with roles bg/fg/muted/accent/danger, no motion tokens, dark mode via `.dark`. Matching: the Settings page, which is the cleanest screen."*
+
+## Step 2: Capture "before"
+
+If you can run the app, screenshot each screen in scope at **390 × 844** and **1440 × 900** (audit.md section 4). If you can't run it, write "Not verified: no running app" now so you don't forget it in the report.
+
+## Step 3: List the surfaces
+
+Write a short list of what is on screen: buttons, inputs, menus, modals, lists, cards, navigation, charts. Then the **states** for each: loading, empty, error, success, disabled, hover, focus, pressed. Mark the states that **don't exist at all**; missing states are usually the biggest wins.
+
+## Step 4: Detect
+
+1. Run the search commands in audit.md section 2 from the project root (always pass `.` as the path).
+2. **Open every hit and confirm it before calling it a problem.** Searches find leads, not verdicts.
+3. For each area that applies, read its reference and compare the rendered UI against it.
+4. Check what searches can't find (contrast on real backgrounds, spacing, alignment, hierarchy) on the screenshots.
+
+How to confirm a hit (real problem vs. false positive):
+
+| Hit | Real problem | False positive, leave it |
+|-----|--------------|--------------------------|
+| `outline-none` | no `focus-visible:` style on the same element | `outline-none focus-visible:ring-2 ...` |
+| `ease-linear` | a menu, card or modal that moves | a spinner, progress bar or marquee |
+| `\bInter\b` | the generator default nobody chose | the documented brand font |
+| `100vh` | a full-height mobile layout | a desktop-only admin view, or `100dvh` fallback next to it |
+| `backdrop-blur` | decoration on a flat card | a sticky header or sheet that really overlays content |
+| `scale-0` | an element entering from a dot | a collapsed element that's also `opacity-0` and never animates in |
+| hex colours in a file | component files with many literals | the token file itself, SVG icons, test fixtures |
+
+## Step 5: Rank
+
+Put every confirmed finding in one level, then fix in order (finish P0 before starting P1):
+
+| Level | Meaning | Typical findings |
+|-------|---------|------------------|
+| **P0 broken** | hurts or blocks a user | contrast below 4.5:1, no visible focus, targets under 24 px, zoom disabled, layout shift, no reduced-motion path |
+| **P1 generic / inconsistent** | the AI look, or drift from the system | purple gradients, filler badges, vague headlines, three primary buttons, off-scale spacing, mixed radii, missing loading/empty/error states |
+| **P2 craft** | type and colour detail | line length, tabular numbers, balanced headings, concentric radii, optical alignment |
+| **P3 polish** | motion and delight | origin awareness, stagger, press feedback, springs |
+
+**Do it yourself vs. ask first:**
+
+| Do it (small, local, reversible) | Ask first, or list under "Proposed" |
+|----------------------------------|-------------------------------------|
+| fix contrast by using an existing darker token | change the brand font or brand colour |
+| add `:focus-visible`, `tabular-nums`, `text-wrap: balance` | rewrite copy beyond deleting obvious filler ("Supercharge your workflow") |
+| replace `transition: all` with exact properties | remove a section, feature or page |
+| add a missing empty state that uses existing components | add a dependency (animation lib, font, icon set) |
+| add motion tokens in the existing token file | restructure navigation or information architecture |
+
+## Step 6: Fix (Full upgrade, Targeted, New build, Un-slop only)
+
+- **Change the token, not the call sites.** If twenty buttons have the wrong radius, fix `--radius` once.
+- **Reuse existing components.** Don't restyle a button locally on one page.
+- **Use what's installed.** CSS and the platform can do almost everything here; no new libraries without asking.
+- **Every animation you add** gets a reduced-motion path and animates only `transform` and `opacity`.
+- **Stay in presentation.** Styles, tokens, semantic markup and UI states only. Never touch data fetching, state management or business rules.
+- **Keep diffs reviewable.** Group by principle. Don't reformat or rename code you aren't changing.
+
+Good vs. bad fixes:
+
+```css
+/* Bad: hard-coded, one call site, animates everything, no reduced motion */
+.card { border-radius: 14px; transition: all .5s linear; }
+
+/* Good: uses the scale, exact properties, eased, short */
+.card {
+  border-radius: var(--radius-lg);
+  transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+```
+
+```tsx
+// Bad: clickable div, no keyboard, no focus, emoji icon
+<div onClick={save} className="p-1 text-xs">💾</div>
+
+// Good: real button, 44 px target, visible focus, consistent icon, label for screen readers
+<button onClick={save} aria-label="Save" className="inline-flex size-11 items-center justify-center rounded-md focus-visible:ring-2 focus-visible:ring-accent">
+  <SaveIcon className="size-5" aria-hidden />
+</button>
+```
+
+## Step 7: Verify in the running app
+
+Look at the result; reading the code is not enough. Follow audit.md section 4:
+
+1. Screenshot again at 390 and 1440; compare with "before" and the reference.
+2. Lighthouse accessibility; fix every contrast and label failure.
+3. Tab through every screen: focus always visible, order logical, nothing unreachable.
+4. Emulate `prefers-reduced-motion: reduce`: feedback still happens without movement.
+5. Click fast during transitions: they reverse, they don't queue.
+6. Dark mode and narrow widths, if the app has them.
+
+**If you can't run something, say exactly what is unverified.** Never write "looks great" about a screen you did not see.
+
+## Step 8: Polish pass
+
+Look at the "after" screenshots once more for things that are slightly off: uneven gaps, edges that don't line up, mismatched radii, text sitting low in buttons, icons off-centre. Fix them.
+
+## Step 9: Un-slop check
+
+Run the unslop.md list on the finished screens one last time. Anything still generic gets fixed or goes under "Proposed".
+
+## Step 10: Report
+
+Use the template in audit.md section 5. List only what changed and what needs a decision. Every row must be something you checked. See examples.md for a filled-in report for each mode.
+
+---
+
+## Common agent mistakes (and what to do instead)
+
+| Mistake | Instead |
+|---------|---------|
+| Adding Framer Motion / GSAP / a colour package | CSS transitions, `@starting-style`, the platform's animation API |
+| Hard-coding `#6b7280` in a component | use or add a role token (`--muted`) in the token file |
+| Animating every hover and scroll reveal | animate feedback and state changes only; frequent actions stay instant |
+| Removing focus rings "because they're ugly" | style them: `:focus-visible` ring in the accent at 3:1 contrast |
+| Swapping the brand font for one from typography.md | keep the brand; propose the change instead |
+| Purple gradient → teal gradient | neutral surfaces + one accent on the primary action |
+| Polishing only the populated screen | design loading, empty and error states too |
+| "The page now looks clean and modern" (unseen) | "Verified at 390 and 1440" or "Not verified: couldn't start the dev server" |
+| A typography request turning into a redesign | fix typography + P0s; list the rest in the report |
+| Editing files in Audit only or Critique mode | report only; offer to apply fixes at the end |
+
+---
+
+## Principle index
+
+One-line versions so you know what exists. **Read the reference before applying any of them.**
+
+### Motion and interaction ([motion.md](references/motion.md))
 
 - **Exaggeration**: errors shake and turn red, not just change colour.
 - **Origin awareness**: popovers and menus grow out of their trigger (`transform-origin`).
@@ -90,7 +229,7 @@ Work out which of these the user asked for before touching code. If it's unclear
 - **Peak-end rule**: polish the best moment and the ending of every flow.
 - **Appeal**: one consistent motion personality and token set.
 
-## UX laws and layout (details: references/ux-laws.md)
+### UX laws and layout ([ux-laws.md](references/ux-laws.md))
 
 - **Doherty threshold**: respond within 400 ms; acknowledge input within 100 ms.
 - **Fitts's law and hit areas**: large, close targets; 44x44 pt / 48x48 dp minimum; expand hit areas with pseudo-elements.
@@ -112,7 +251,7 @@ Work out which of these the user asked for before touching code. If it's unclear
 - **Continuity**: morph instead of swapping so the eye keeps its place.
 - **Anthropomorphism**: light personality at low-stakes moments only.
 
-## Typography (details: references/typography.md)
+### Typography ([typography.md](references/typography.md))
 
 - Kerning on; tracking +0.04 to 0.08em on caps, slightly negative on big headlines; leading about 1.5 for body.
 - Line length 45 to 75 characters (`max-width: 65ch`); `text-wrap: balance` on headings, `pretty` on paragraphs.
@@ -122,28 +261,30 @@ Work out which of these the user asked for before touching code. If it's unclear
 - Text contrast at WCAG AA (4.5:1 body).
 - Fonts by feeling (Swiss, friendly, personality, techy, vintage, serif, fun) and the generator-default fonts to avoid.
 
-## Colour (details: references/color.md)
+### Colour ([color.md](references/color.md))
 
 - Work in OKLCH with role-named tokens, a neutral ramp and one accent; red and green only for status.
 - Terms covered: hue, chroma, tint, shade, tone, analogous colours, simultaneous contrast, chromostereopsis, increased contrast mode, gamut, Abney effect, irradiation illusion, Stevens' power law, Hunt effect, Helmholtz–Kohlrausch effect, additive colour, opacity, sequential and diverging scales, relative luminance.
 
-## Un-slop checklist (details: references/unslop.md)
+### Un-slop checklist ([unslop.md](references/unslop.md))
 
 Delete filler badges, drop redundant labels, no random italic word, mono only where meaningful, use a design system, show the actual product, enlarge the main feature, specific headlines, one primary CTA, one accent colour instead of purple gradients, consistent icons, no decorative glows or glass, concentric radii, real contrast, balanced headlines, optical alignment, tabular numbers, loading/empty/error states, animate useful feedback only.
 
-## Patterns (details: references/patterns.md)
+### Patterns ([patterns.md](references/patterns.md))
 
 - **Add to cart**: a drawer that slides in and stays, with photo, variant, price, Keep shopping and Checkout. Never navigate away.
 - **Password and sign-up**: no red rule walls or confirm field; block common passwords; offer a generated password; outline as strength meter; mono field so dots morph into letters; clear success state.
 - **App Store screenshots**: brand colour, one idea per headline, branded headline style, real depth and lighting, one continuous visual across frames, hook split over the first two slides, social proof.
 - **Pricing**: two to four plans, one recommended, tabular prices, one filled CTA.
 
-## Guardrails
+---
 
-- Motion must explain a change or give feedback. Remove motion that does neither.
-- Don't stack several principles on one element until it feels busy. Restraint over spectacle.
-- Keep the product's existing brand (fonts, colours, voice) unless the user asks to change it.
-- Accessibility is never traded for style: contrast, focus visibility, target size and reduced motion come first.
-- Change presentation only: styles, tokens, markup structure for semantics and states. Leave data, state and business logic alone.
-- Keep diffs reviewable: group changes by principle, and don't reformat or rename code you aren't changing.
-- Every claim in the report must be something you checked. Say what you couldn't verify.
+## Hard rules
+
+1. Motion must explain a change or give feedback. Remove motion that does neither.
+2. Restraint over spectacle: don't stack several principles on one element.
+3. Keep the brand (fonts, colours, voice) unless the user asks to change it.
+4. Accessibility is never traded for style: contrast, focus, target size and reduced motion come first.
+5. Presentation only. Leave data, state and business logic alone.
+6. Audit only, Critique and Review modes don't edit files unless the user then asks.
+7. Every claim in the report is something you checked. Say what you couldn't verify.

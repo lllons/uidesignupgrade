@@ -38,7 +38,7 @@ If the folder already exists, update it with `git pull` inside it instead of clo
 ## 4. Verify
 
 - `SKILL.md` exists in the installed folder.
-- The `references/` folder exists next to it, with `audit.md`, `platforms.md`, `motion.md`, `ux-laws.md`, `typography.md`, `color.md`, `unslop.md` and `patterns.md`.
+- The `references/` folder exists next to it, with `audit.md`, `platforms.md`, `motion.md`, `ux-laws.md`, `typography.md`, `color.md`, `unslop.md`, `patterns.md` and `examples.md`.
 - Reload skills if your agent needs it (for example `/skills reload` in Gemini CLI or Copilot), or tell the user to restart the agent.
 
 ## 5. Tell the user

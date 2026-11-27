@@ -84,6 +84,7 @@ It picks a mode from your request (full upgrade, audit only, one area, new build
 | [color.md](references/color.md) | 20 colour terms and a working OKLCH colour system |
 | [unslop.md](references/unslop.md) | the checklist for removing the generic AI look |
 | [patterns.md](references/patterns.md) | add-to-cart, sign-up/password, App Store screenshots, pricing |
+| [examples.md](references/examples.md) | worked runs for every mode: findings, false positives, diffs and filled-in reports |
 
 ## Motion and interaction, before and after
 
